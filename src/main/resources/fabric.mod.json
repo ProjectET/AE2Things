@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "AE2Things",
+  "version": "${version}",
+  "name": "AE2Things",
+  "description": "Adds Crystal growth chamber and advanced inscriber",
+  "authors": [
+    "ProjectET"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/AE2Things/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "io.github.projectet.ae2things.client.AE2ThingsClient"
+    ],
+    "main": [
+      "io.github.projectet.ae2things.AE2Things"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.12.12",
+    "fabric": "*",
+    "minecraft": "1.18.1"
+  }
+}
