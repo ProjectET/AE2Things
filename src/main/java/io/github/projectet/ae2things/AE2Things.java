@@ -4,6 +4,7 @@ import io.github.projectet.ae2things.block.BlockAdvancedInscriber;
 import io.github.projectet.ae2things.block.BlockCrystalGrowth;
 import io.github.projectet.ae2things.block.entity.BEAdvancedInscriber;
 import io.github.projectet.ae2things.block.entity.BECrystalGrowth;
+import io.github.projectet.ae2things.item.AETItems;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
@@ -31,6 +32,7 @@ public class AE2Things implements ModInitializer {
     public void onInitialize() {
         registerBlockwithItem("advanced_inscriber", ADVANCED_INSCRIBER);
         registerBlockwithItem("crystal_growth", CRYSTAL_GROWTH);
+        AETItems.init();
     }
 
     public static Identifier id(String path) {

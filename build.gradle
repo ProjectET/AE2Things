@@ -45,7 +45,9 @@ dependencies {
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    modRuntimeOnly("appeng:appliedenergistics2-fabric:${project.ae2_version}")
+    modCompileOnly("appeng:appliedenergistics2-fabric:${project.ae2_version}") {
+        transitive = false
+    }
 
     modImplementation("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
         exclude(group: "net.fabricmc.fabric-api")
