@@ -131,7 +131,7 @@ public class DISKDrive extends Item implements IBasicCellItem, AEToolItem {
 
                     // drop empty storage cell case
                     playerInventory.offerOrDrop(new ItemStack(AETItems.DISK_HOUSING));
-
+                    AE2Things.STORAGE_INSTANCE.removeDisk(stack.getOrCreateNbt().getUuid(Constants.DISKUUID));
                     return true;
                 }
             }
