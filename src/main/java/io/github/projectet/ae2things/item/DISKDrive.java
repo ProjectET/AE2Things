@@ -102,11 +102,6 @@ public class DISKDrive extends Item implements IDISKCellItem, AEToolItem {
     @Override
     public TypedActionResult<ItemStack> use(final World level, final PlayerEntity player, final Hand hand) {
         this.disassembleDrive(player.getStackInHand(hand), level, player);
-        if(!level.isClient){
-            System.out.println(AE2Things.STORAGE_INSTANCE.getOrCreateDisk(player.getStackInHand(hand).getOrCreateNbt().getUuid(Constants.DISKUUID)));
-            System.out.println(player.getStackInHand(hand).getOrCreateNbt());
-            System.out.println(getCellInventory(player.getStackInHand(hand), null).getClass().getSimpleName());
-        }
 
         return new TypedActionResult<>(ActionResult.success(level.isClient()),
                 player.getStackInHand(hand));
