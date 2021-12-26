@@ -1,15 +1,19 @@
 package io.github.projectet.ae2things.item;
 
 import appeng.api.config.FuzzyMode;
+import appeng.api.implementations.IUpgradeInventory;
 import appeng.api.stacks.AEKeyType;
-import appeng.api.storage.StorageCells;
-import appeng.api.storage.cells.IBasicCellItem;
 import appeng.hooks.AEToolItem;
 import appeng.items.contents.CellConfig;
+import appeng.items.contents.CellUpgrades;
 import appeng.util.ConfigInventory;
 import appeng.util.InteractionUtil;
+import com.google.common.base.Preconditions;
 import io.github.projectet.ae2things.AE2Things;
+import io.github.projectet.ae2things.storage.DISKCellHandler;
+import io.github.projectet.ae2things.storage.IDISKCellItem;
 import io.github.projectet.ae2things.util.Constants;
+import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -17,15 +21,20 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.UUID;
 
+import static appeng.api.storage.StorageCells.getCellInventory;
+
 //Acronym is Deep Item Storage disK Drive
-public class DISKDrive extends Item implements IBasicCellItem, AEToolItem {
+public class DISKDrive extends Item implements IDISKCellItem, AEToolItem {
 
     private final int bytes;
     private final double idleDrain;
@@ -33,7 +42,7 @@ public class DISKDrive extends Item implements IBasicCellItem, AEToolItem {
 
     public DISKDrive(Settings settings, ItemConvertible coreItem, int kilobytes, double idleDrain) {
         super(settings.group(AE2Things.ITEM_GROUP));
-        this.bytes = kilobytes * 1024;
+        this.bytes = kilobytes * 1000;
         this.coreItem = coreItem;
         this.idleDrain = idleDrain;
     }
@@ -48,24 +57,13 @@ public class DISKDrive extends Item implements IBasicCellItem, AEToolItem {
         super.inventoryTick(stack, world, entity, slot, selected);
 
         if(!world.isClient && !stack.hasNbt()) {
-            UUID id = UUID.randomUUID();
-            stack.getOrCreateNbt().putUuid(Constants.DISKUUID, id);
+            stack.getOrCreateNbt().putUuid(Constants.DISKUUID, UUID.randomUUID());
         }
     }
 
     @Override
     public int getBytes(ItemStack cellItem) {
         return bytes;
-    }
-
-    @Override
-    public int getBytesPerType(ItemStack cellItem) {
-        return 1;
-    }
-
-    @Override
-    public int getTotalTypes(ItemStack cellItem) {
-        return Integer.MAX_VALUE;
     }
 
     @Override
@@ -104,8 +102,20 @@ public class DISKDrive extends Item implements IBasicCellItem, AEToolItem {
     @Override
     public TypedActionResult<ItemStack> use(final World level, final PlayerEntity player, final Hand hand) {
         this.disassembleDrive(player.getStackInHand(hand), level, player);
+        if(!level.isClient){
+            System.out.println(AE2Things.STORAGE_INSTANCE.getOrCreateDisk(player.getStackInHand(hand).getOrCreateNbt().getUuid(Constants.DISKUUID)));
+            System.out.println(player.getStackInHand(hand).getOrCreateNbt());
+            System.out.println(getCellInventory(player.getStackInHand(hand), null).getClass().getSimpleName());
+        }
+
         return new TypedActionResult<>(ActionResult.success(level.isClient()),
                 player.getStackInHand(hand));
+    }
+
+    @Nullable
+    @Override
+    public IUpgradeInventory getUpgradesInventory(ItemStack is) {
+        return new CellUpgrades(is, 2);
     }
 
     private boolean disassembleDrive(final ItemStack stack, final World level, final PlayerEntity player) {
@@ -115,7 +125,7 @@ public class DISKDrive extends Item implements IBasicCellItem, AEToolItem {
             }
 
             final PlayerInventory playerInventory = player.getInventory();
-            var inv = StorageCells.getCellInventory(stack, null);
+            var inv = getCellInventory(stack, null);
             if (inv != null && playerInventory.getMainHandStack() == stack) {
                 var list = inv.getAvailableStacks();
                 if (list.isEmpty()) {
@@ -131,7 +141,9 @@ public class DISKDrive extends Item implements IBasicCellItem, AEToolItem {
 
                     // drop empty storage cell case
                     playerInventory.offerOrDrop(new ItemStack(AETItems.DISK_HOUSING));
+
                     AE2Things.STORAGE_INSTANCE.removeDisk(stack.getOrCreateNbt().getUuid(Constants.DISKUUID));
+
                     return true;
                 }
             }
@@ -144,5 +156,10 @@ public class DISKDrive extends Item implements IBasicCellItem, AEToolItem {
         return this.disassembleDrive(stack, context.getWorld(), context.getPlayer())
                 ? ActionResult.success(context.getWorld().isClient())
                 : ActionResult.PASS;
+    }
+
+    @Override
+    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
+        if(AE2Things.STORAGE_INSTANCE != null) addCellInformationToTooltip(stack, tooltip);
     }
 }

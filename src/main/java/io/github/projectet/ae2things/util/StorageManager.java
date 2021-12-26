@@ -11,15 +11,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+//TODO: Change map value from NbtCompound to DataStorage
 public class StorageManager extends PersistentState {
     private final Map<UUID, NbtCompound> disks;
 
     public StorageManager() {
         disks = new HashMap<>();
+        this.markDirty();
     }
 
     private StorageManager(Map<UUID, NbtCompound> disks) {
         this.disks = disks;
+        this.markDirty();
     }
 
     @Override
@@ -27,13 +30,9 @@ public class StorageManager extends PersistentState {
         NbtList diskList = new NbtList();
         for (Map.Entry<UUID, NbtCompound> entry : disks.entrySet()) {
             NbtCompound disk = new NbtCompound();
-            NbtCompound data = new NbtCompound();
-
-            data.put(DISKCellInventory.STACK_KEYS, entry.getValue().get(DISKCellInventory.STACK_KEYS));
-            data.putLongArray(DISKCellInventory.STACK_AMOUNTS, entry.getValue().getLongArray(DISKCellInventory.STACK_AMOUNTS));
 
             disk.putUuid(Constants.DISKUUID, entry.getKey());
-            disk.put(Constants.DISKDATA, data);
+            disk.put(Constants.DISKDATA, entry.getValue());
             diskList.add(disk);
         }
 
@@ -51,7 +50,7 @@ public class StorageManager extends PersistentState {
         return new StorageManager(disks);
     }
 
-    public void addorUpdateDisk(UUID uuid, NbtCompound nbt) {
+    public void updateDisk(UUID uuid, NbtCompound nbt) {
         disks.put(uuid, nbt);
         markDirty();
     }
@@ -63,9 +62,17 @@ public class StorageManager extends PersistentState {
 
     public NbtCompound getOrCreateDisk(UUID uuid) {
         if(!disks.containsKey(uuid)) {
-            addorUpdateDisk(uuid, new NbtCompound());
+            updateDisk(uuid, emptyDataNBT());
         }
         return disks.get(uuid);
+    }
+
+    public static NbtCompound emptyDataNBT() {
+        NbtCompound nbt = new NbtCompound();
+        nbt.put(DISKCellInventory.STACK_KEYS, new NbtList());
+        nbt.putLongArray(DISKCellInventory.STACK_AMOUNTS, new long[0]);
+        nbt.putLong(DISKCellInventory.ITEM_COUNT_TAG, 0);
+        return nbt;
     }
 
     public static StorageManager getInstance(MinecraftServer server) {

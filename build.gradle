@@ -34,6 +34,12 @@ repositories {
     maven {
         url 'https://storage.googleapis.com/devan-maven/'
     }
+    maven {
+        url "https://maven.bai.lol"
+        content {
+            includeGroup "mcp.mobius.waila"
+        }
+    }
 }
 
 dependencies {
@@ -45,12 +51,14 @@ dependencies {
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    modCompileOnly("appeng:appliedenergistics2-fabric:${project.ae2_version}") {
-        transitive = false
-    }
+    modImplementation("appeng:appliedenergistics2-fabric:${project.ae2_version}")
 
     modImplementation("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
         exclude(group: "net.fabricmc.fabric-api")
+    }
+
+    modCompileOnly("mcp.mobius.waila:wthit-api:fabric-${project.wthit_version}") {
+        exclude group: "net.fabricmc.fabric-api"
     }
 
     include modImplementation("teamreborn:energy:${project.energy_version}")

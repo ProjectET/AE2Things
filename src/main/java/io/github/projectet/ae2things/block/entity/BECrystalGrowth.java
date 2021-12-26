@@ -4,14 +4,18 @@ import io.github.projectet.ae2things.AE2Things;
 import io.github.projectet.ae2things.inventory.ThingInventory;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.inventory.SidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class BECrystalGrowth extends BlockEntity implements ThingInventory, SidedInventory {
+
+    DefaultedList<ItemStack> inventory = DefaultedList.ofSize(30);
 
     public BECrystalGrowth(BlockPos pos, BlockState state) {
         super(AE2Things.CRYSTAL_GROWTH_BE, pos, state);
@@ -37,4 +41,7 @@ public class BECrystalGrowth extends BlockEntity implements ThingInventory, Side
         return false;
     }
 
+    public static void tick(World world, BlockPos pos, BlockState state, BECrystalGrowth blockEntity) {
+
+    }
 }

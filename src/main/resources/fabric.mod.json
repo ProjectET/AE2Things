@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "AE2Things",
+  "id": "ae2things",
   "version": "${version}",
   "name": "AE2Things",
   "description": "Adds Crystal growth chamber and advanced inscriber",
@@ -12,10 +12,7 @@
   "icon": "assets/AE2Things/icon.png",
   "environment": "*",
   "entrypoints": {
-    "client": [
-      "io.github.projectet.ae2things.client.AE2ThingsClient"
-    ],
-    "main": [
+    "ae2": [
       "io.github.projectet.ae2things.AE2Things"
     ]
   },
