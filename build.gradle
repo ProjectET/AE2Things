@@ -32,9 +32,6 @@ repositories {
         }
     }
     maven {
-        url 'https://storage.googleapis.com/devan-maven/'
-    }
-    maven {
         url "https://maven.bai.lol"
         content {
             includeGroup "mcp.mobius.waila"
@@ -63,12 +60,6 @@ dependencies {
 
     include modImplementation("teamreborn:energy:${project.energy_version}")
 
-    modImplementation("io.github.astrarre:astrarre-gui-v1-fabric:1.0.15")
-
-    include("io.github.astrarre:astrarre-access-v0-fabric:1.8.3")
-    include("io.github.astrarre:astrarre-util-v0-fabric:1.2.4")
-    include("io.github.astrarre:astrarre-itemview-v0-fabric:1.0.5")
-    include("io.github.astrarre:astrarre-hash-v0-fabric:1.0.3")
     // PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
     // You may need to force-disable transitiveness on them.
 }

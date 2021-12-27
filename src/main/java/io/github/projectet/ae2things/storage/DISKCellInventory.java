@@ -26,8 +26,6 @@ import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.text.Text;
 
@@ -56,8 +54,8 @@ public class DISKCellInventory implements StorageCell {
         this.i = stack;
         this.container = saveProvider;
         this.keyType = cellType.getKeyType();
-        this.storedItems = getTag().getLongArray(STACK_AMOUNTS).length;
-        this.storedItemCount = getTag().getLong(ITEM_COUNT_TAG);
+        this.storedItems = getDiskStorage().stackAmounts.length;
+        this.storedItemCount = getDiskStorage().itemCount;
         this.storedAmounts = null;
 
         updateFilter();
@@ -89,8 +87,8 @@ public class DISKCellInventory implements StorageCell {
         partitionList = builder.build();
     }
 
-    private NbtCompound getTag() {
-        return AE2Things.STORAGE_INSTANCE.getOrCreateDiskNbt(getDiskUUID());
+    private DataStorage getDiskStorage() {
+        return AE2Things.STORAGE_INSTANCE.getOrCreateDisk(getDiskUUID());
     }
 
     public IncludeExclude getPartitionListMode() {
@@ -232,8 +230,8 @@ public class DISKCellInventory implements StorageCell {
     private void loadCellItems() {
         boolean corruptedTag = false;
 
-        var amounts = getTag().getLongArray(STACK_AMOUNTS);
-        var tags = getTag().getList(STACK_KEYS, NbtElement.COMPOUND_TYPE);
+        var amounts = getDiskStorage().stackAmounts;
+        var tags = getDiskStorage().stackKeys;
         if (amounts.length != tags.size()) {
             AELog.warn("Loading storage cell with mismatched amounts/tags: %d != %d",
                     amounts.length, tags.size());
@@ -261,7 +259,7 @@ public class DISKCellInventory implements StorageCell {
 
     protected void saveChanges() {
         // recalculate values
-        this.storedItems = (short) this.storedAmounts.size();
+        this.storedItems = this.storedAmounts.size();
         this.storedItemCount = 0;
         for (var storedAmount : this.storedAmounts.values()) {
             this.storedItemCount += storedAmount;
