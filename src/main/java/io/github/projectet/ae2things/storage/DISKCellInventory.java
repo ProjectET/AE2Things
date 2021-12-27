@@ -162,6 +162,7 @@ public class DISKCellInventory implements StorageCell {
         this.storedItems = (short) this.storedAmounts.size();
 
         this.storedItemCount = itemCount;
+        i.getOrCreateNbt().putLong(DISKCellInventory.ITEM_COUNT_TAG, itemCount);
 
         this.isPersisted = true;
     }

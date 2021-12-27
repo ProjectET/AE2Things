@@ -28,18 +28,10 @@ public class DISKCellHandler implements ICellHandler {
 
     public void addCellInformationToTooltip(ItemStack stack, List<Text> lines) {
         if(stack.getOrCreateNbt().contains(Constants.DISKUUID)) {
-            var handler = getCellInventory(stack, null);
-            if (handler == null) {
-                return;
-            }
+            lines.add(new LiteralText(stack.getOrCreateNbt().getLong(DISKCellInventory.ITEM_COUNT_TAG) + " ").append(GuiText.Of.text())
+                    .append(" " + ((DISKDrive) stack.getItem()).getBytes(stack) + "").append(GuiText.BytesUsed.text()));
 
-            lines.add(new LiteralText("Disk UUID: " + stack.getOrCreateNbt().getUuid(Constants.DISKUUID)));
-
-
-            lines.add(new LiteralText(handler.getUsedBytes() + " ").append(GuiText.Of.text())
-                    .append(" " + handler.getTotalBytes() + "").append(GuiText.BytesUsed.text()));
-
-            if (handler.isPreformatted()) {
+            /*if (handler.isPreformatted()) {
                 var list = (handler.getPartitionListMode() == IncludeExclude.WHITELIST ? GuiText.Included
                         : GuiText.Excluded)
                         .text();
@@ -50,7 +42,7 @@ public class DISKCellHandler implements ICellHandler {
                     lines.add(
                             GuiText.Partitioned.withSuffix(" - ").append(list).append(" ").append(GuiText.Precise.text()));
                 }
-            }
+            }*/
         }
     }
 }

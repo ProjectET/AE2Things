@@ -11,8 +11,10 @@ import appeng.util.InteractionUtil;
 import com.google.common.base.Preconditions;
 import io.github.projectet.ae2things.AE2Things;
 import io.github.projectet.ae2things.storage.DISKCellHandler;
+import io.github.projectet.ae2things.storage.DISKCellInventory;
 import io.github.projectet.ae2things.storage.IDISKCellItem;
 import io.github.projectet.ae2things.util.Constants;
+import io.github.projectet.ae2things.util.StorageManager;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -21,6 +23,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -55,9 +58,10 @@ public class DISKDrive extends Item implements IDISKCellItem, AEToolItem {
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         super.inventoryTick(stack, world, entity, slot, selected);
-
-        if(!world.isClient && !stack.hasNbt()) {
-            stack.getOrCreateNbt().putUuid(Constants.DISKUUID, UUID.randomUUID());
+        if (!world.isClient) {
+            if (!stack.hasNbt()) {
+                stack.getOrCreateNbt().putUuid(Constants.DISKUUID, UUID.randomUUID());
+            }
         }
     }
 
@@ -155,6 +159,9 @@ public class DISKDrive extends Item implements IDISKCellItem, AEToolItem {
 
     @Override
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
-        if(AE2Things.STORAGE_INSTANCE != null) addCellInformationToTooltip(stack, tooltip);
+        if(stack.getOrCreateNbt().contains(Constants.DISKUUID)) {
+            tooltip.add(new LiteralText("Disk UUID: " + stack.getOrCreateNbt().getUuid(Constants.DISKUUID)));
+            addCellInformationToTooltip(stack, tooltip);
+        }
     }
 }
