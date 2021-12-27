@@ -54,8 +54,6 @@ public class DISKCellInventory implements StorageCell {
         this.i = stack;
         this.container = saveProvider;
         this.keyType = cellType.getKeyType();
-        this.storedItems = getDiskStorage().stackAmounts.length;
-        this.storedItemCount = getDiskStorage().itemCount;
         this.storedAmounts = null;
 
         updateFilter();
@@ -134,6 +132,14 @@ public class DISKCellInventory implements StorageCell {
     @Override
     public void persist() {
         if (this.isPersisted) {
+            return;
+        }
+
+        if(storedItemCount == 0) {
+            if(i.hasNbt()) {
+                getStorageInstance().removeDisk(getDiskUUID());
+                i.setNbt(null);
+            }
             return;
         }
 
@@ -231,6 +237,10 @@ public class DISKCellInventory implements StorageCell {
     private void loadCellItems() {
         boolean corruptedTag = false;
 
+        if(!i.hasNbt()) {
+            return;
+        }
+
         var amounts = getDiskStorage().stackAmounts;
         var tags = getDiskStorage().stackKeys;
         if (amounts.length != tags.size()) {
@@ -281,6 +291,11 @@ public class DISKCellInventory implements StorageCell {
 
     @Override
     public long insert(AEKey what, long amount, Actionable mode, IActionSource source) {
+        if(!i.hasNbt()) {
+            i.getOrCreateNbt().putUuid(Constants.DISKUUID, UUID.randomUUID());
+            getStorageInstance().getOrCreateDisk(getDiskUUID());
+        }
+
         if (amount == 0 || !keyType.contains(what)) {
             return 0;
         }
