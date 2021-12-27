@@ -152,6 +152,7 @@ public class DISKCellInventory implements StorageCell {
             if(i.hasNbt()) {
                 getStorageInstance().removeDisk(getDiskUUID());
                 i.setNbt(null);
+                initData();
             }
             return;
         }
