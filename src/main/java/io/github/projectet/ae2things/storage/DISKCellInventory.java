@@ -55,6 +55,7 @@ public class DISKCellInventory implements StorageCell {
         this.container = saveProvider;
         this.keyType = cellType.getKeyType();
         this.storedAmounts = null;
+        initData();
 
         updateFilter();
     }
@@ -87,6 +88,18 @@ public class DISKCellInventory implements StorageCell {
 
     private DataStorage getDiskStorage() {
         return AE2Things.STORAGE_INSTANCE.getOrCreateDisk(getDiskUUID());
+    }
+
+    private void initData() {
+        if(i.hasNbt()) {
+            this.storedItems = getDiskStorage().stackAmounts.length;
+            this.storedItemCount = getDiskStorage().itemCount;
+        }
+        else {
+            this.storedItems = 0;
+            this.storedItemCount = 0;
+            getCellItems();
+        }
     }
 
     public IncludeExclude getPartitionListMode() {
@@ -294,6 +307,7 @@ public class DISKCellInventory implements StorageCell {
         if(!i.hasNbt()) {
             i.getOrCreateNbt().putUuid(Constants.DISKUUID, UUID.randomUUID());
             getStorageInstance().getOrCreateDisk(getDiskUUID());
+            loadCellItems();
         }
 
         if (amount == 0 || !keyType.contains(what)) {
