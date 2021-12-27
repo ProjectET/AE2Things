@@ -20,6 +20,7 @@ import appeng.util.prioritylist.IPartitionList;
 import io.github.projectet.ae2things.AE2Things;
 import io.github.projectet.ae2things.item.DISKDrive;
 import io.github.projectet.ae2things.util.Constants;
+import io.github.projectet.ae2things.util.DataStorage;
 import io.github.projectet.ae2things.util.StorageManager;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
@@ -89,7 +90,7 @@ public class DISKCellInventory implements StorageCell {
     }
 
     private NbtCompound getTag() {
-        return AE2Things.STORAGE_INSTANCE.getOrCreateDisk(getDiskUUID());
+        return AE2Things.STORAGE_INSTANCE.getOrCreateDiskNbt(getDiskUUID());
     }
 
     public IncludeExclude getPartitionListMode() {
@@ -155,26 +156,14 @@ public class DISKCellInventory implements StorageCell {
         }
 
         if (keys.isEmpty()) {
-            AE2Things.STORAGE_INSTANCE.updateDisk(getDiskUUID(), StorageManager.emptyDataNBT());
+            AE2Things.STORAGE_INSTANCE.updateDisk(getDiskUUID(), new DataStorage());
         } else {
-            NbtCompound nbt = StorageManager.emptyDataNBT();
-            nbt.put(STACK_KEYS, keys);
-            nbt.putLongArray(STACK_AMOUNTS, amounts.toArray(new long[0]));
-            AE2Things.STORAGE_INSTANCE.updateDisk(getDiskUUID(), nbt);
+            getStorageInstance().modifyDisk(getDiskUUID(), keys, amounts.toArray(new long[0]), itemCount);
         }
 
         this.storedItems = (short) this.storedAmounts.size();
 
         this.storedItemCount = itemCount;
-        if (itemCount == 0) {
-            NbtCompound disk = AE2Things.STORAGE_INSTANCE.getOrCreateDisk(getDiskUUID());
-            disk.remove(ITEM_COUNT_TAG);
-            getStorageInstance().updateDisk(getDiskUUID(), disk);
-        } else {
-            NbtCompound disk = AE2Things.STORAGE_INSTANCE.getOrCreateDisk(getDiskUUID());
-            disk.putLong(ITEM_COUNT_TAG, itemCount);
-            getStorageInstance().updateDisk(getDiskUUID(), disk);
-        }
 
         this.isPersisted = true;
     }

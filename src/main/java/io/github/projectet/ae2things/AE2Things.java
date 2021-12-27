@@ -10,7 +10,6 @@ import io.github.projectet.ae2things.gui.cell.DISKItemCellGuiHandler;
 import io.github.projectet.ae2things.item.AETItems;
 import io.github.projectet.ae2things.storage.DISKCellHandler;
 import io.github.projectet.ae2things.util.StorageManager;
-import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
@@ -22,6 +21,7 @@ import net.minecraft.item.*;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
+//TODO Set DISK Cell colour to black
 public class AE2Things implements IAEAddonEntrypoint {
 
     public static final String MOD_ID = "ae2things";
