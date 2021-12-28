@@ -1,17 +1,25 @@
 package io.github.projectet.ae2things.block;
 
+import appeng.block.AEBaseEntityBlock;
+import appeng.menu.MenuLocator;
+import appeng.menu.MenuOpener;
+import appeng.menu.implementations.InscriberMenu;
+import appeng.util.InteractionUtil;
 import io.github.projectet.ae2things.AE2Things;
 import io.github.projectet.ae2things.block.entity.BEAdvancedInscriber;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityTicker;
-import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 
-public class BlockAdvancedInscriber extends BlockWithEntity {
+import javax.annotation.Nullable;
+
+public class BlockAdvancedInscriber extends AEBaseEntityBlock<BEAdvancedInscriber> {
 
     public BlockAdvancedInscriber(Settings settings) {
         super(settings);
@@ -20,12 +28,25 @@ public class BlockAdvancedInscriber extends BlockWithEntity {
     @Nullable
     @Override
     public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return new BEAdvancedInscriber(pos, state);
+        return AE2Things.ADVANCED_INSCRIBER_BE.instantiate(pos, state);
     }
 
-    @Nullable
     @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-        return checkType(type, AE2Things.ADVANCED_INSCRIBER_BE, BEAdvancedInscriber::tick);
+    public ActionResult onActivated(final World level, final BlockPos pos, final PlayerEntity p,
+                                    final Hand hand,
+                                    final @Nullable ItemStack heldItem, final BlockHitResult hit) {
+        if (!InteractionUtil.isInAlternateUseMode(p)) {
+            final BEAdvancedInscriber tg = this.getBlockEntity(level, pos);
+            if (tg != null) {
+                if (!level.isClient()) {
+                    MenuOpener.open(InscriberMenu.TYPE, p,
+                            MenuLocator.forBlockEntitySide(tg, hit.getSide()));
+                }
+                return ActionResult.success(level.isClient());
+            }
+        }
+        return ActionResult.PASS;
+
     }
+
 }

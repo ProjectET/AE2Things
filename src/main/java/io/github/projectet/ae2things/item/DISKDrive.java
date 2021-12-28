@@ -8,13 +8,9 @@ import appeng.items.contents.CellConfig;
 import appeng.items.contents.CellUpgrades;
 import appeng.util.ConfigInventory;
 import appeng.util.InteractionUtil;
-import com.google.common.base.Preconditions;
 import io.github.projectet.ae2things.AE2Things;
-import io.github.projectet.ae2things.storage.DISKCellHandler;
-import io.github.projectet.ae2things.storage.DISKCellInventory;
 import io.github.projectet.ae2things.storage.IDISKCellItem;
 import io.github.projectet.ae2things.util.Constants;
-import io.github.projectet.ae2things.util.StorageManager;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -26,17 +22,16 @@ import net.minecraft.item.ItemUsageContext;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.UUID;
 
 import static appeng.api.storage.StorageCells.getCellInventory;
 
-//Acronym is Deep Item Storage disK Drive
 public class DISKDrive extends Item implements IDISKCellItem, AEToolItem {
 
     private final int bytes;
@@ -152,6 +147,7 @@ public class DISKDrive extends Item implements IDISKCellItem, AEToolItem {
 
     @Override
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
+        tooltip.add(new LiteralText("Deep Item Storage disK - Storage for dummies").formatted(Formatting.DARK_GRAY, Formatting.ITALIC));
         if(stack.getOrCreateNbt().contains(Constants.DISKUUID)) {
             tooltip.add(new LiteralText("Disk UUID: " + stack.getOrCreateNbt().getUuid(Constants.DISKUUID)));
             addCellInformationToTooltip(stack, tooltip);
