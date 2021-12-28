@@ -1,6 +1,7 @@
 package io.github.projectet.ae2things;
 
 import appeng.api.IAEAddonEntrypoint;
+import appeng.api.client.StorageCellModels;
 import appeng.api.storage.StorageCells;
 import io.github.projectet.ae2things.block.BlockAdvancedInscriber;
 import io.github.projectet.ae2things.block.BlockCrystalGrowth;
