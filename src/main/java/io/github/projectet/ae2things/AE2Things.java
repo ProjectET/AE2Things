@@ -1,12 +1,12 @@
 package io.github.projectet.ae2things;
 
 import appeng.api.IAEAddonEntrypoint;
-import appeng.api.client.StorageCellModels;
 import appeng.api.storage.StorageCells;
 import io.github.projectet.ae2things.block.BlockAdvancedInscriber;
 import io.github.projectet.ae2things.block.BlockCrystalGrowth;
 import io.github.projectet.ae2things.block.entity.BEAdvancedInscriber;
 import io.github.projectet.ae2things.block.entity.BECrystalGrowth;
+import io.github.projectet.ae2things.gui.advancedInscriber.AdvancedInscriberMenu;
 import io.github.projectet.ae2things.gui.cell.DISKItemCellGuiHandler;
 import io.github.projectet.ae2things.item.AETItems;
 import io.github.projectet.ae2things.storage.DISKCellHandler;
@@ -15,6 +15,7 @@ import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
+import net.fabricmc.fabric.api.screenhandler.v1.ScreenHandlerRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.Material;
 import net.minecraft.block.entity.BlockEntityType;
@@ -22,12 +23,11 @@ import net.minecraft.item.*;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
-//TODO Set DISK Cell colour to black
 public class AE2Things implements IAEAddonEntrypoint {
 
     public static final String MOD_ID = "ae2things";
 
-    public static final ItemGroup ITEM_GROUP = FabricItemGroupBuilder.build(id("item_group"), () -> new ItemStack(Items.QUARTZ));
+    public static final ItemGroup ITEM_GROUP = FabricItemGroupBuilder.build(id("item_group"), () -> new ItemStack(AETItems.DISK_HOUSING));
 
     public static StorageManager STORAGE_INSTANCE;
 
@@ -51,6 +51,9 @@ public class AE2Things implements IAEAddonEntrypoint {
         AETItems.init();
         StorageCells.addCellHandler(DISKCellHandler.INSTANCE);
         StorageCells.addCellGuiHandler(new DISKItemCellGuiHandler());
+
+        AdvancedInscriberMenu.ADVANCED_INSCRIBER_SHT = ScreenHandlerRegistry.registerExtended(AE2Things.id("advanced_inscriber"), AdvancedInscriberMenu::new);
+
         registerBlockwithItem("advanced_inscriber", ADVANCED_INSCRIBER);
         registerBlockwithItem("crystal_growth", CRYSTAL_GROWTH);
 

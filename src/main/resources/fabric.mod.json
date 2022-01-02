@@ -14,6 +14,9 @@
   "entrypoints": {
     "ae2": [
       "io.github.projectet.ae2things.AE2Things"
+    ],
+    "ae2:client": [
+      "io.github.projectet.ae2things.client.AE2ThingsClient"
     ]
   },
   "depends": {

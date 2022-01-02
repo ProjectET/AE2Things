@@ -399,7 +399,6 @@ public class DISKCellInventory implements StorageCell {
     }
 
     public boolean canHoldNewItem() {
-        final long bytesFree = this.getFreeBytes();
-        return (bytesFree > 0);
+        return (getFreeBytes() > 0 && getFreeBytes() != getTotalBytes());
     }
 }

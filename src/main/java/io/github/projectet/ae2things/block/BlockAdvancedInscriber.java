@@ -1,16 +1,13 @@
 package io.github.projectet.ae2things.block;
 
 import appeng.block.AEBaseEntityBlock;
-import appeng.menu.MenuLocator;
-import appeng.menu.MenuOpener;
-import appeng.menu.implementations.InscriberMenu;
-import appeng.util.InteractionUtil;
 import io.github.projectet.ae2things.AE2Things;
 import io.github.projectet.ae2things.block.entity.BEAdvancedInscriber;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -35,18 +32,20 @@ public class BlockAdvancedInscriber extends AEBaseEntityBlock<BEAdvancedInscribe
     public ActionResult onActivated(final World level, final BlockPos pos, final PlayerEntity p,
                                     final Hand hand,
                                     final @Nullable ItemStack heldItem, final BlockHitResult hit) {
-        if (!InteractionUtil.isInAlternateUseMode(p)) {
-            final BEAdvancedInscriber tg = this.getBlockEntity(level, pos);
-            if (tg != null) {
-                if (!level.isClient()) {
-                    MenuOpener.open(InscriberMenu.TYPE, p,
-                            MenuLocator.forBlockEntitySide(tg, hit.getSide()));
-                }
-                return ActionResult.success(level.isClient());
+        if(!level.isClient) {
+            NamedScreenHandlerFactory factory = level.getBlockState(pos).createScreenHandlerFactory(level, pos);
+            if(factory != null) {
+                p.openHandledScreen(factory);
             }
         }
-        return ActionResult.PASS;
+        return ActionResult.SUCCESS;
+    }
 
+    @Nullable
+    @Override
+    public NamedScreenHandlerFactory createScreenHandlerFactory(BlockState state, World world, BlockPos pos) {
+        BlockEntity be = world.getBlockEntity(pos);
+        return be instanceof NamedScreenHandlerFactory ? (NamedScreenHandlerFactory) be : null;
     }
 
 }
