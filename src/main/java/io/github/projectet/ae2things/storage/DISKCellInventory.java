@@ -305,11 +305,6 @@ public class DISKCellInventory implements StorageCell {
 
     @Override
     public long insert(AEKey what, long amount, Actionable mode, IActionSource source) {
-        if(!i.hasNbt()) {
-            i.getOrCreateNbt().putUuid(Constants.DISKUUID, UUID.randomUUID());
-            getStorageInstance().getOrCreateDisk(getDiskUUID());
-            loadCellItems();
-        }
 
         if (amount == 0 || !keyType.contains(what)) {
             return 0;
@@ -333,6 +328,12 @@ public class DISKCellInventory implements StorageCell {
             if (!isCellEmpty(meInventory)) {
                 return 0;
             }
+        }
+
+        if(!i.hasNbt()) {
+            i.getOrCreateNbt().putUuid(Constants.DISKUUID, UUID.randomUUID());
+            getStorageInstance().getOrCreateDisk(getDiskUUID());
+            loadCellItems();
         }
 
         var currentAmount = this.getCellItems().getLong(what);

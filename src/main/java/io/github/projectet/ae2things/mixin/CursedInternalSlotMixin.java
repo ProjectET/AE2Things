@@ -18,6 +18,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.UUID;
 
@@ -28,7 +29,7 @@ public abstract class CursedInternalSlotMixin {
     @Shadow
     public DefaultedList<Slot> slots;
 
-    @Inject(method = "internalOnSlotClick", at = @At(value = "INVOKE", target = "net/minecraft/screen/slot/Slot.hasStack()Z"), slice = @Slice(from = @At(value = "INVOKE", target = "net/minecraft/item/ItemStack.copy ()Lnet/minecraft/item/ItemStack;")), cancellable = true)
+    @Inject(method = "internalOnSlotClick", at = @At(value = "INVOKE", target = "net/minecraft/screen/slot/Slot.hasStack()Z"), slice = @Slice(from = @At(value = "INVOKE", target = "net/minecraft/item/ItemStack.copy ()Lnet/minecraft/item/ItemStack;")), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
     public void CLONE(int slotIndex, int button, SlotActionType actionType, PlayerEntity player, CallbackInfo ci) {
         Slot i = this.slots.get(slotIndex);
         if(i.getStack().getItem() instanceof DISKDrive && i.getStack().hasNbt()) {
