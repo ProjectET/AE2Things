@@ -9,7 +9,7 @@
   ],
   "contact": {},
   "license": "MIT",
-  "icon": "assets/AE2Things/icon.png",
+  "icon": "assets/ae2things/icon.png",
   "environment": "*",
   "mixins": [
     "ae2things.mixins.json"
