@@ -54,8 +54,8 @@ public class AE2Things implements IAEAddonEntrypoint {
 
         AdvancedInscriberMenu.ADVANCED_INSCRIBER_SHT = ScreenHandlerRegistry.registerExtended(AE2Things.id("advanced_inscriber"), AdvancedInscriberMenu::new);
 
-        registerBlockwithItem("advanced_inscriber", ADVANCED_INSCRIBER);
-        registerBlockwithItem("crystal_growth", CRYSTAL_GROWTH);
+        //registerBlockwithItem("advanced_inscriber", ADVANCED_INSCRIBER);
+        //registerBlockwithItem("crystal_growth", CRYSTAL_GROWTH);
 
         ServerTickEvents.START_WORLD_TICK.register((world -> {
             STORAGE_INSTANCE = StorageManager.getInstance(world.getServer());

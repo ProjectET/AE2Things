@@ -11,6 +11,7 @@ import appeng.util.inv.CombinedInternalInventory;
 import appeng.util.inv.FilteredInternalInventory;
 import appeng.util.inv.filter.IAEItemFilter;
 import io.github.projectet.ae2things.AE2Things;
+import io.github.projectet.ae2things.gui.advancedInscriber.AdvancedInscriberMenu;
 import io.github.projectet.ae2things.gui.advancedInscriber.AdvancedInscriberRootPanel;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.block.BlockState;
@@ -113,7 +114,7 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements Ex
     @Nullable
     @Override
     public ScreenHandler createMenu(int syncId, PlayerInventory inv, PlayerEntity player) {
-        return new AdvancedInscriberRootPanel(syncId, inv);
+        return new AdvancedInscriberMenu(syncId, inv);
     }
 
     @Override

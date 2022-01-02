@@ -1,13 +1,12 @@
 package io.github.projectet.ae2things.gui.advancedInscriber;
 
-import io.github.cottonmc.cotton.gui.SyncedGuiDescription;
+import io.github.cottonmc.cotton.gui.client.CottonInventoryScreen;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.text.Text;
 
-public class AdvancedInscriberRootPanel extends SyncedGuiDescription {
+public class AdvancedInscriberRootPanel extends CottonInventoryScreen<AdvancedInscriberMenu> {
 
-    public AdvancedInscriberRootPanel(int syncId, PlayerInventory playerInventory) {
-        super(AdvancedInscriberMenu.ADVANCED_INSCRIBER_SHT, syncId, playerInventory);
+    public AdvancedInscriberRootPanel(AdvancedInscriberMenu description, PlayerInventory inventory, Text title) {
+        super(description, inventory, title);
     }
-
-
 }

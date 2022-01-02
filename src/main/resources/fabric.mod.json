@@ -11,6 +11,9 @@
   "license": "MIT",
   "icon": "assets/AE2Things/icon.png",
   "environment": "*",
+  "mixins": [
+    "ae2things.mixins.json"
+  ],
   "entrypoints": {
     "ae2": [
       "io.github.projectet.ae2things.AE2Things"
@@ -22,6 +25,7 @@
   "depends": {
     "fabricloader": ">=0.12.12",
     "fabric": "*",
+    "ae2": ">=10.0.0-beta.1",
     "minecraft": "1.18.1"
   }
 }
