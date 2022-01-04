@@ -8,5 +8,9 @@ public class AdvancedInscriberRootPanel extends CottonInventoryScreen<AdvancedIn
 
     public AdvancedInscriberRootPanel(AdvancedInscriberMenu description, PlayerInventory inventory, Text title) {
         super(description, inventory, title);
+        width = 176;
+        height = 176;
+        backgroundHeight = 176;
+        backgroundWidth = 176;
     }
 }

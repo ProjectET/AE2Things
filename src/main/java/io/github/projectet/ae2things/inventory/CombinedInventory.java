@@ -1,31 +1,25 @@
 package io.github.projectet.ae2things.inventory;
 
+import appeng.util.inv.CombinedInternalInventory;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.collection.DefaultedList;
 
-public interface ThingInventory extends Inventory {
+public interface CombinedInventory extends Inventory {
 
     /**
      * Retrieves the item list of this inventory.
      * Must return the same instance every time it's called.
      */
-    DefaultedList<ItemStack> getItems();
+    CombinedInternalInventory getItems();
 
     /**
      * Creates an inventory from the item list.
      */
-    static ThingInventory of(DefaultedList<ItemStack> items) {
+    static CombinedInventory of(CombinedInternalInventory items) {
         return () -> items;
-    }
-
-    /**
-     * Creates a new inventory with the specified size.
-     */
-    static ThingInventory ofSize(int size) {
-        return of(DefaultedList.ofSize(size, ItemStack.EMPTY));
     }
 
     /**
@@ -56,7 +50,7 @@ public interface ThingInventory extends Inventory {
      */
     @Override
     default ItemStack getStack(int slot) {
-        return getItems().get(slot);
+        return getItems().getStackInSlot(slot);
     }
 
     /**
@@ -67,7 +61,7 @@ public interface ThingInventory extends Inventory {
      */
     @Override
     default ItemStack removeStack(int slot, int count) {
-        ItemStack result = Inventories.splitStack(getItems(), slot, count);
+        ItemStack result = getItems().removeItems(count, getStack(slot), null);
         if (!result.isEmpty()) {
             markDirty();
         }
@@ -80,7 +74,8 @@ public interface ThingInventory extends Inventory {
      */
     @Override
     default ItemStack removeStack(int slot) {
-        return Inventories.removeStack(getItems(), slot);
+        ItemStack stack = getStack(slot);
+        return getItems().removeItems(stack.getCount(), stack, null);
     }
 
     /**
@@ -92,7 +87,7 @@ public interface ThingInventory extends Inventory {
      */
     @Override
     default void setStack(int slot, ItemStack stack) {
-        getItems().set(slot, stack);
+        getItems().setItemDirect(slot, stack);
         if (stack.getCount() > getMaxCountPerStack()) {
             stack.setCount(getMaxCountPerStack());
         }
@@ -103,7 +98,7 @@ public interface ThingInventory extends Inventory {
      */
     @Override
     default void clear() {
-        getItems().clear();
+        getItems().toContainer().clear();
     }
 
     /**

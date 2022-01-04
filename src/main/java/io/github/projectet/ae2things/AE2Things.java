@@ -52,7 +52,7 @@ public class AE2Things implements IAEAddonEntrypoint {
         StorageCells.addCellHandler(DISKCellHandler.INSTANCE);
         StorageCells.addCellGuiHandler(new DISKItemCellGuiHandler());
 
-        AdvancedInscriberMenu.ADVANCED_INSCRIBER_SHT = ScreenHandlerRegistry.registerExtended(AE2Things.id("advanced_inscriber"), AdvancedInscriberMenu::new);
+        //AdvancedInscriberMenu.ADVANCED_INSCRIBER_SHT = ScreenHandlerRegistry.registerExtended(AE2Things.id("advanced_inscriber"), AdvancedInscriberMenu::new);
 
         //registerBlockwithItem("advanced_inscriber", ADVANCED_INSCRIBER);
         //registerBlockwithItem("crystal_growth", CRYSTAL_GROWTH);

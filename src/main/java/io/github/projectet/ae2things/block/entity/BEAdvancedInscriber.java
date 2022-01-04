@@ -4,7 +4,6 @@ import appeng.api.inventories.InternalInventory;
 import appeng.blockentity.grid.AENetworkPowerBlockEntity;
 import appeng.blockentity.misc.InscriberRecipes;
 import appeng.core.definitions.AEItems;
-import appeng.parts.automation.DefinitionUpgradeInventory;
 import appeng.recipes.handlers.InscriberRecipe;
 import appeng.util.inv.AppEngInternalInventory;
 import appeng.util.inv.CombinedInternalInventory;
@@ -12,26 +11,26 @@ import appeng.util.inv.FilteredInternalInventory;
 import appeng.util.inv.filter.IAEItemFilter;
 import io.github.projectet.ae2things.AE2Things;
 import io.github.projectet.ae2things.gui.advancedInscriber.AdvancedInscriberMenu;
-import io.github.projectet.ae2things.gui.advancedInscriber.AdvancedInscriberRootPanel;
+import io.github.projectet.ae2things.inventory.CombinedInventory;
+import io.github.projectet.ae2things.inventory.DefaultInventory;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.EnumSet;
 
-public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements ExtendedScreenHandlerFactory {
+public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements ExtendedScreenHandlerFactory, CombinedInventory {
 
     // cycles from 0 - 16, at 8 it preforms the action, at 16 it re-enables the
     // normal routine.
@@ -47,14 +46,14 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements Ex
     private final InternalInventory inv = new CombinedInternalInventory(this.topItemHandler,
             this.bottomItemHandler, this.sideItemHandler);
 
-    private final DefinitionUpgradeInventory upgrades;
+//    private final DefinitionUpgradeInventory upgrades;
     private InscriberRecipe cachedTask;
 
 
     public BEAdvancedInscriber(BlockPos pos, BlockState state) {
         super(AE2Things.ADVANCED_INSCRIBER_BE, pos, state);
 
-        this.upgrades = new DefinitionUpgradeInventory(AE2Things.ADVANCED_INSCRIBER, this, 3);
+ //       this.upgrades = new DefinitionUpgradeInventory(AE2Things.ADVANCED_INSCRIBER, this, 3);
 
         this.sideItemHandler.setMaxStackSize(1, 64);
 
@@ -114,13 +113,19 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements Ex
     @Nullable
     @Override
     public ScreenHandler createMenu(int syncId, PlayerInventory inv, PlayerEntity player) {
-        return new AdvancedInscriberMenu(syncId, inv);
+        return new AdvancedInscriberMenu(syncId, inv, this, getPos());
     }
 
     @Override
     public void writeScreenOpeningData(ServerPlayerEntity player, PacketByteBuf buf) {
         buf.writeBlockPos(getPos());
     }
+
+    @Override
+    public CombinedInternalInventory getItems() {
+        return (CombinedInternalInventory) inv;
+    }
+
 
     public class FilteredInventory implements IAEItemFilter {
         @Override

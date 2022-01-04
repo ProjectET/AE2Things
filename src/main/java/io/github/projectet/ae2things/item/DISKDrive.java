@@ -1,11 +1,11 @@
 package io.github.projectet.ae2things.item;
 
 import appeng.api.config.FuzzyMode;
-import appeng.api.implementations.IUpgradeInventory;
 import appeng.api.stacks.AEKeyType;
+import appeng.api.upgrades.IUpgradeInventory;
+import appeng.api.upgrades.UpgradeInventories;
 import appeng.hooks.AEToolItem;
 import appeng.items.contents.CellConfig;
-import appeng.items.contents.CellUpgrades;
 import appeng.util.ConfigInventory;
 import appeng.util.InteractionUtil;
 import io.github.projectet.ae2things.AE2Things;
@@ -103,8 +103,8 @@ public class DISKDrive extends Item implements IDISKCellItem, AEToolItem {
 
     @Nullable
     @Override
-    public IUpgradeInventory getUpgradesInventory(ItemStack is) {
-        return new CellUpgrades(is, 2);
+    public IUpgradeInventory getUpgrades(ItemStack is) {
+        return UpgradeInventories.forItem(is, 2);
     }
 
     private boolean disassembleDrive(final ItemStack stack, final World level, final PlayerEntity player) {
@@ -124,7 +124,7 @@ public class DISKDrive extends Item implements IDISKCellItem, AEToolItem {
                     playerInventory.offerOrDrop(new ItemStack(coreItem));
 
                     // drop upgrades
-                    for (ItemStack upgrade : this.getUpgradesInventory(stack)) {
+                    for (ItemStack upgrade : this.getUpgrades(stack)) {
                         playerInventory.offerOrDrop(upgrade);
                     }
 

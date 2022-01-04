@@ -3,7 +3,6 @@ package io.github.projectet.ae2things.storage;
 import appeng.api.config.Actionable;
 import appeng.api.config.FuzzyMode;
 import appeng.api.config.IncludeExclude;
-import appeng.api.implementations.items.IUpgradeModule;
 import appeng.api.inventories.InternalInventory;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.stacks.AEItemKey;
@@ -13,7 +12,9 @@ import appeng.api.stacks.KeyCounter;
 import appeng.api.storage.cells.CellState;
 import appeng.api.storage.cells.ISaveProvider;
 import appeng.api.storage.cells.StorageCell;
+import appeng.api.upgrades.IUpgradeInventory;
 import appeng.core.AELog;
+import appeng.core.definitions.AEItems;
 import appeng.util.ConfigInventory;
 import appeng.util.prioritylist.FuzzyPriorityList;
 import appeng.util.prioritylist.IPartitionList;
@@ -66,18 +67,9 @@ public class DISKCellInventory implements StorageCell {
         var upgrades = getUpgradesInventory();
         var config = getConfigInventory();
 
-        boolean hasInverter = false;
-
-        for (var upgrade : upgrades) {
-            var u = IUpgradeModule.getTypeFromStack(upgrade);
-            if (u != null) {
-                switch (u) {
-                    case FUZZY -> builder.fuzzyMode(getFuzzyMode());
-                    case INVERTER -> hasInverter = true;
-                    default -> {
-                    }
-                }
-            }
+        boolean hasInverter = upgrades.isInstalled(AEItems.INVERTER_CARD);
+        if (upgrades.isInstalled(AEItems.FUZZY_CARD)) {
+            builder.fuzzyMode(getFuzzyMode());
         }
 
         builder.addAll(config.keySet());
@@ -122,8 +114,8 @@ public class DISKCellInventory implements StorageCell {
         return this.cellType.getFuzzyMode(this.i);
     }
 
-    public InternalInventory getUpgradesInventory() {
-        return this.cellType.getUpgradesInventory(this.i);
+    public IUpgradeInventory getUpgradesInventory() {
+        return this.cellType.getUpgrades(this.i);
     }
 
     @Override

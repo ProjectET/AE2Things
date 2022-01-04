@@ -1,10 +1,9 @@
 package io.github.projectet.ae2things.block.entity;
 
 import io.github.projectet.ae2things.AE2Things;
-import io.github.projectet.ae2things.inventory.ThingInventory;
+import io.github.projectet.ae2things.inventory.DefaultInventory;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.inventory.SidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.collection.DefaultedList;
@@ -13,7 +12,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-public class BECrystalGrowth extends BlockEntity implements ThingInventory, SidedInventory {
+public class BECrystalGrowth extends BlockEntity implements DefaultInventory, SidedInventory {
 
     DefaultedList<ItemStack> inventory = DefaultedList.ofSize(30);
 
