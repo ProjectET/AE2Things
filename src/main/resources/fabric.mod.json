@@ -3,7 +3,7 @@
   "id": "ae2things",
   "version": "${version}",
   "name": "AE2Things",
-  "description": "Adds Crystal growth chamber and advanced inscriber",
+  "description": "Adds Crystal growth chamber, advanced inscriber and the DISK",
   "authors": [
     "ProjectET"
   ],

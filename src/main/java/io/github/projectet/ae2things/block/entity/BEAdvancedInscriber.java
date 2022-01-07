@@ -1,6 +1,8 @@
 package io.github.projectet.ae2things.block.entity;
 
 import appeng.api.inventories.InternalInventory;
+import appeng.api.upgrades.IUpgradeInventory;
+import appeng.api.upgrades.UpgradeInventories;
 import appeng.blockentity.grid.AENetworkPowerBlockEntity;
 import appeng.blockentity.misc.InscriberRecipes;
 import appeng.core.definitions.AEItems;
@@ -46,14 +48,14 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements Ex
     private final InternalInventory inv = new CombinedInternalInventory(this.topItemHandler,
             this.bottomItemHandler, this.sideItemHandler);
 
-//    private final DefinitionUpgradeInventory upgrades;
+    private final IUpgradeInventory upgrades;
     private InscriberRecipe cachedTask;
 
 
     public BEAdvancedInscriber(BlockPos pos, BlockState state) {
         super(AE2Things.ADVANCED_INSCRIBER_BE, pos, state);
 
- //       this.upgrades = new DefinitionUpgradeInventory(AE2Things.ADVANCED_INSCRIBER, this, 3);
+        this.upgrades = UpgradeInventories.forMachine(AE2Things.ADVANCED_INSCRIBER, 5, this::saveChanges);
 
         this.sideItemHandler.setMaxStackSize(1, 64);
 
@@ -113,7 +115,7 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements Ex
     @Nullable
     @Override
     public ScreenHandler createMenu(int syncId, PlayerInventory inv, PlayerEntity player) {
-        return new AdvancedInscriberMenu(syncId, inv, this, getPos());
+        return new AdvancedInscriberMenu(syncId, inv, getPos());
     }
 
     @Override
