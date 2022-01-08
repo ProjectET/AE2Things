@@ -1,8 +1,14 @@
 package io.github.projectet.ae2things.block;
 
 import appeng.block.AEBaseEntityBlock;
+import appeng.blockentity.misc.InscriberBlockEntity;
+import appeng.menu.MenuOpener;
+import appeng.menu.implementations.InscriberMenu;
+import appeng.menu.locator.MenuLocators;
+import appeng.util.InteractionUtil;
 import io.github.projectet.ae2things.AE2Things;
 import io.github.projectet.ae2things.block.entity.BEAdvancedInscriber;
+import io.github.projectet.ae2things.gui.advancedInscriber.AdvancedInscriberMenu;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -32,20 +38,18 @@ public class BlockAdvancedInscriber extends AEBaseEntityBlock<BEAdvancedInscribe
     public ActionResult onActivated(final World level, final BlockPos pos, final PlayerEntity p,
                                     final Hand hand,
                                     final @Nullable ItemStack heldItem, final BlockHitResult hit) {
-        if(!level.isClient) {
-            NamedScreenHandlerFactory factory = level.getBlockState(pos).createScreenHandlerFactory(level, pos);
-            if(factory != null) {
-                p.openHandledScreen(factory);
+        if (!InteractionUtil.isInAlternateUseMode(p)) {
+            final BEAdvancedInscriber ai = (BEAdvancedInscriber) level.getBlockEntity(pos);
+            if (ai != null) {
+                if (!level.isClient()) {
+                    hit.getSide();
+                    MenuOpener.open(AdvancedInscriberMenu.ADVANCED_INSCRIBER_SHT, p,
+                            MenuLocators.forBlockEntity(ai));
+                }
+                return ActionResult.success(level.isClient());
             }
         }
-        return ActionResult.SUCCESS;
-    }
-
-    @Nullable
-    @Override
-    public NamedScreenHandlerFactory createScreenHandlerFactory(BlockState state, World world, BlockPos pos) {
-        BlockEntity be = world.getBlockEntity(pos);
-        return be instanceof NamedScreenHandlerFactory ? (NamedScreenHandlerFactory) be : null;
+        return ActionResult.PASS;
     }
 
 }

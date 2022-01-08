@@ -2,6 +2,7 @@ package io.github.projectet.ae2things.block.entity;
 
 import appeng.api.inventories.InternalInventory;
 import appeng.api.upgrades.IUpgradeInventory;
+import appeng.api.upgrades.IUpgradeableObject;
 import appeng.api.upgrades.UpgradeInventories;
 import appeng.blockentity.grid.AENetworkPowerBlockEntity;
 import appeng.blockentity.misc.InscriberRecipes;
@@ -14,7 +15,6 @@ import appeng.util.inv.filter.IAEItemFilter;
 import io.github.projectet.ae2things.AE2Things;
 import io.github.projectet.ae2things.gui.advancedInscriber.AdvancedInscriberMenu;
 import io.github.projectet.ae2things.inventory.CombinedInventory;
-import io.github.projectet.ae2things.inventory.DefaultInventory;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
@@ -25,14 +25,13 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
-import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
 
-public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements ExtendedScreenHandlerFactory, CombinedInventory {
+public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements ExtendedScreenHandlerFactory, CombinedInventory, IUpgradeableObject {
 
     // cycles from 0 - 16, at 8 it preforms the action, at 16 it re-enables the
     // normal routine.
@@ -82,6 +81,11 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements Ex
     }
 
     @Override
+    public IUpgradeInventory getUpgrades() {
+        return upgrades;
+    }
+
+    @Override
     public void onReady() {
         this.getMainNode().setExposedOnSides(EnumSet.allOf(Direction.class));
         this.getMainNode().create(getWorld(), getBlockEntity().getPos());
@@ -115,7 +119,7 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements Ex
     @Nullable
     @Override
     public ScreenHandler createMenu(int syncId, PlayerInventory inv, PlayerEntity player) {
-        return new AdvancedInscriberMenu(syncId, inv, getPos());
+        return new AdvancedInscriberMenu(syncId, inv, this);
     }
 
     @Override

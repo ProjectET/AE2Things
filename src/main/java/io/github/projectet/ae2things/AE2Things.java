@@ -2,6 +2,10 @@ package io.github.projectet.ae2things;
 
 import appeng.api.IAEAddonEntrypoint;
 import appeng.api.storage.StorageCells;
+import appeng.api.upgrades.Upgrades;
+import appeng.core.AppEng;
+import appeng.core.definitions.AEBlocks;
+import appeng.core.definitions.AEItems;
 import io.github.projectet.ae2things.block.BlockAdvancedInscriber;
 import io.github.projectet.ae2things.block.BlockCrystalGrowth;
 import io.github.projectet.ae2things.block.entity.BEAdvancedInscriber;
@@ -15,11 +19,13 @@ import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
-import net.fabricmc.fabric.api.screenhandler.v1.ScreenHandlerRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.Material;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.item.*;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
@@ -52,10 +58,10 @@ public class AE2Things implements IAEAddonEntrypoint {
         StorageCells.addCellHandler(DISKCellHandler.INSTANCE);
         StorageCells.addCellGuiHandler(new DISKItemCellGuiHandler());
 
-        //AdvancedInscriberMenu.ADVANCED_INSCRIBER_SHT = ScreenHandlerRegistry.registerExtended(AE2Things.id("advanced_inscriber"), AdvancedInscriberMenu::new);
+        registerBlockwithItem("advanced_inscriber", ADVANCED_INSCRIBER);
+        registerBlockwithItem("crystal_growth", CRYSTAL_GROWTH);
 
-        //registerBlockwithItem("advanced_inscriber", ADVANCED_INSCRIBER);
-        //registerBlockwithItem("crystal_growth", CRYSTAL_GROWTH);
+        Upgrades.add(AEItems.SPEED_CARD, ADVANCED_INSCRIBER, 5);
 
         ServerTickEvents.START_WORLD_TICK.register((world -> {
             STORAGE_INSTANCE = StorageManager.getInstance(world.getServer());
