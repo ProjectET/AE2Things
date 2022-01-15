@@ -1,54 +1,67 @@
 package io.github.projectet.ae2things.block.entity;
 
+import appeng.api.config.Actionable;
+import appeng.api.config.PowerMultiplier;
+import appeng.api.inventories.ISegmentedInventory;
 import appeng.api.inventories.InternalInventory;
+import appeng.api.networking.IGridNode;
+import appeng.api.networking.energy.IEnergyService;
+import appeng.api.networking.energy.IEnergySource;
+import appeng.api.networking.ticking.IGridTickable;
+import appeng.api.networking.ticking.TickRateModulation;
+import appeng.api.networking.ticking.TickingRequest;
 import appeng.api.upgrades.IUpgradeInventory;
 import appeng.api.upgrades.IUpgradeableObject;
 import appeng.api.upgrades.UpgradeInventories;
 import appeng.blockentity.grid.AENetworkPowerBlockEntity;
 import appeng.blockentity.misc.InscriberRecipes;
 import appeng.core.definitions.AEItems;
+import appeng.core.settings.TickRates;
+import appeng.recipes.handlers.InscriberProcessType;
 import appeng.recipes.handlers.InscriberRecipe;
 import appeng.util.inv.AppEngInternalInventory;
 import appeng.util.inv.CombinedInternalInventory;
 import appeng.util.inv.FilteredInternalInventory;
 import appeng.util.inv.filter.IAEItemFilter;
 import io.github.projectet.ae2things.AE2Things;
-import io.github.projectet.ae2things.gui.advancedInscriber.AdvancedInscriberMenu;
-import io.github.projectet.ae2things.inventory.CombinedInventory;
-import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
+import java.util.List;
 
-public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements ExtendedScreenHandlerFactory, CombinedInventory, IUpgradeableObject {
+public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IGridTickable, IUpgradeableObject {
 
     // cycles from 0 - 16, at 8 it preforms the action, at 16 it re-enables the
     // normal routine.
     private final AppEngInternalInventory topItemHandler = new AppEngInternalInventory(this, 1, 64);
-    private final AppEngInternalInventory bottomItemHandler = new AppEngInternalInventory(this, 1, 64);
+    private final AppEngInternalInventory botItemHandler = new AppEngInternalInventory(this, 1, 64);
     private final AppEngInternalInventory sideItemHandler = new AppEngInternalInventory(this, 2, 64);
 
     // The externally visible inventories (with filters applied)
     private final InternalInventory topItemHandlerExtern;
-    private final InternalInventory bottomItemHandlerExtern;
+    private final InternalInventory botItemHandlerExtern;
     private final InternalInventory sideItemHandlerExtern;
 
-    private final InternalInventory inv = new CombinedInternalInventory(this.topItemHandler,
-            this.bottomItemHandler, this.sideItemHandler);
+    private final InternalInventory combinedExtInventory;
+
+    private int finalStep;
+
+    private final InternalInventory inv = new CombinedInternalInventory(this.topItemHandler, this.botItemHandler, this.sideItemHandler);
 
     private final IUpgradeInventory upgrades;
     private InscriberRecipe cachedTask;
+    private int processingTime = 0;
+    private final int maxProcessingTime = 100;
+    private boolean smash;
+    private long clientStart;
 
 
     public BEAdvancedInscriber(BlockPos pos, BlockState state) {
@@ -58,10 +71,18 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements Ex
 
         this.sideItemHandler.setMaxStackSize(1, 64);
 
+        this.getMainNode()
+                .setExposedOnSides(EnumSet.allOf(Direction.class))
+                .setIdlePowerUsage(0)
+                .addService(IGridTickable.class, this);
+        this.setInternalMaxPower(1600);
+
         var filter = new FilteredInventory();
         this.topItemHandlerExtern = new FilteredInternalInventory(this.topItemHandler, filter);
-        this.bottomItemHandlerExtern = new FilteredInternalInventory(this.bottomItemHandler, filter);
+        this.botItemHandlerExtern = new FilteredInternalInventory(this.botItemHandler, filter);
         this.sideItemHandlerExtern = new FilteredInternalInventory(this.sideItemHandler, filter);
+
+        this.combinedExtInventory = new CombinedInternalInventory(topItemHandlerExtern, botItemHandlerExtern, sideItemHandlerExtern);
     }
 
     @Override
@@ -70,14 +91,27 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements Ex
     }
 
     @Override
-    public void onChangeInventory(InternalInventory inv, int slot) {
+    public InternalInventory getExposedInventoryForSide(Direction facing)  {
+        return combinedExtInventory;
+    }
 
+    @Override
+    public void onChangeInventory(InternalInventory inv, int slot) {
+        if (slot == 0) {
+            this.setProcessingTime(0);
+        }
+
+        if (!this.isSmash()) {
+            this.markForUpdate();
+        }
+
+        this.cachedTask = null;
+        getMainNode().ifPresent((grid, node) -> grid.getTickManager().wakeDevice(node));
     }
 
     @Override
     public void setOrientation(final Direction inForward, final Direction inUp) {
         setPowerSides(EnumSet.allOf(Direction.class));
-        getMainNode().setExposedOnSides(EnumSet.allOf(Direction.class));
     }
 
     @Override
@@ -88,12 +122,57 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements Ex
     @Override
     public void onReady() {
         this.getMainNode().setExposedOnSides(EnumSet.allOf(Direction.class));
-        this.getMainNode().create(getWorld(), getBlockEntity().getPos());
+        super.onReady();
+    }
+
+    private void setClientStart(long clientStart) {
+        this.clientStart = clientStart;
+    }
+
+    @Override
+    protected boolean readFromStream(PacketByteBuf data) {
+        var c = super.readFromStream(data);
+
+        var oldSmash = isSmash();
+        var newSmash = data.readBoolean();
+
+        if (oldSmash != newSmash && newSmash) {
+            setSmash(true);
+            setClientStart(System.currentTimeMillis());
+        }
+
+        for (int i = 0; i < this.inv.size(); i++) {
+            this.inv.setItemDirect(i, data.readItemStack());
+        }
+        this.cachedTask = null;
+
+        return c;
+    }
+
+    @Override
+    protected void writeToStream(PacketByteBuf data) {
+        super.writeToStream(data);
+
+        data.writeBoolean(isSmash());
+        for (int i = 0; i < this.inv.size(); i++) {
+            data.writeItemStack(inv.getStackInSlot(i));
+        }
+    }
+
+    @Nullable
+    @Override
+    public InternalInventory getSubInventory(Identifier id) {
+        if (id.equals(ISegmentedInventory.STORAGE)) {
+            return this.getInternalInventory();
+        } else if (id.equals(ISegmentedInventory.UPGRADES)) {
+            return this.upgrades;
+        }
+
+        return super.getSubInventory(id);
     }
 
     public boolean isSmash() {
-
-        return false;
+        return smash;
     }
 
     @Nullable
@@ -101,7 +180,7 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements Ex
         if (this.cachedTask == null && world != null) {
             ItemStack input = this.sideItemHandler.getStackInSlot(0);
             ItemStack plateA = this.topItemHandler.getStackInSlot(0);
-            ItemStack plateB = this.bottomItemHandler.getStackInSlot(0);
+            ItemStack plateB = this.botItemHandler.getStackInSlot(0);
             if (input.isEmpty()) {
                 return null; // No input to handle
             }
@@ -112,24 +191,122 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements Ex
     }
 
     @Override
-    public Text getDisplayName() {
-        return new LiteralText("Advanced Inscriber");
-    }
-
-    @Nullable
-    @Override
-    public ScreenHandler createMenu(int syncId, PlayerInventory inv, PlayerEntity player) {
-        return new AdvancedInscriberMenu(syncId, inv, this);
+    public void writeNbt(NbtCompound data) {
+        super.writeNbt(data);
+        this.upgrades.writeToNBT(data, "upgrades");
     }
 
     @Override
-    public void writeScreenOpeningData(ServerPlayerEntity player, PacketByteBuf buf) {
-        buf.writeBlockPos(getPos());
+    public void loadTag(NbtCompound data) {
+        super.loadTag(data);
+        this.upgrades.readFromNBT(data, "upgrades");
     }
 
     @Override
-    public CombinedInternalInventory getItems() {
-        return (CombinedInternalInventory) inv;
+    public void addAdditionalDrops(World level, BlockPos pos, List<ItemStack> drops) {
+        super.addAdditionalDrops(level, pos, drops);
+
+        for (var upgrade : upgrades) {
+            drops.add(upgrade);
+        }
+    }
+
+    private boolean hasWork() {
+        if (this.getTask() != null) {
+            return true;
+        }
+
+        this.setProcessingTime(0);
+        return this.isSmash();
+    }
+
+    private void setProcessingTime(int processingTime) {
+        this.processingTime = processingTime;
+    }
+
+    @Override
+    public TickingRequest getTickingRequest(IGridNode node) {
+        return new TickingRequest(TickRates.Inscriber, !this.hasWork(), false);
+    }
+
+    @Override
+    public TickRateModulation tickingRequest(IGridNode node, int ticksSinceLastCall) {
+        if (this.isSmash()) {
+            this.finalStep++;
+            if (this.finalStep == 8) {
+                final InscriberRecipe out = this.getTask();
+                if (out != null) {
+                    final ItemStack outputCopy = out.getOutput().copy();
+
+                    if (this.sideItemHandler.insertItem(1, outputCopy, false).isEmpty()) {
+                        this.setProcessingTime(0);
+                        if (out.getProcessType() == InscriberProcessType.PRESS) {
+                            this.topItemHandler.extractItem(0, 1, false);
+                            this.botItemHandler.extractItem(0, 1, false);
+                        }
+                        this.sideItemHandler.extractItem(0, 1, false);
+                    }
+                }
+                this.saveChanges();
+            } else if (this.finalStep == 16) {
+                this.finalStep = 0;
+                this.setSmash(false);
+                this.markForUpdate();
+            }
+        } else {
+            getMainNode().ifPresent(grid -> {
+                IEnergyService eg = grid.getEnergyService();
+                IEnergySource src = this;
+
+                // Base 1, increase by 1 for each card
+                final int speedFactor = 1 + this.upgrades.getInstalledUpgrades(AEItems.SPEED_CARD);
+                final int powerConsumption = 10 * speedFactor;
+                final double powerThreshold = powerConsumption - 0.01;
+                double powerReq = this.extractAEPower(powerConsumption, Actionable.SIMULATE, PowerMultiplier.CONFIG);
+
+                if (powerReq <= powerThreshold) {
+                    src = eg;
+                    powerReq = eg.extractAEPower(powerConsumption, Actionable.SIMULATE, PowerMultiplier.CONFIG);
+                }
+
+                if (powerReq > powerThreshold) {
+                    src.extractAEPower(powerConsumption, Actionable.MODULATE, PowerMultiplier.CONFIG);
+
+                    if (this.getProcessingTime() == 0) {
+                        this.setProcessingTime(this.getProcessingTime() + speedFactor);
+                    } else {
+                        this.setProcessingTime(this.getProcessingTime() + ticksSinceLastCall * speedFactor);
+                    }
+                }
+            });
+
+            if (this.getProcessingTime() > this.getMaxProcessingTime()) {
+                this.setProcessingTime(this.getMaxProcessingTime());
+                final InscriberRecipe out = this.getTask();
+                if (out != null) {
+                    final ItemStack outputCopy = out.getOutput().copy();
+                    if (this.sideItemHandler.insertItem(1, outputCopy, true).isEmpty()) {
+                        this.setSmash(true);
+                        this.finalStep = 0;
+                        this.markForUpdate();
+                    }
+                }
+            }
+        }
+
+        return this.hasWork() ? TickRateModulation.URGENT : TickRateModulation.SLEEP;
+    }
+
+    public int getMaxProcessingTime() {
+        return maxProcessingTime;
+    }
+
+    public int getProcessingTime() {
+        return this.processingTime;
+    }
+
+    public void setSmash(boolean smash) {
+        this.smash = smash;
     }
 
 
@@ -154,7 +331,7 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements Ex
                 return false;
             }
 
-            if (inv == BEAdvancedInscriber.this.topItemHandler || inv == BEAdvancedInscriber.this.bottomItemHandler) {
+            if (inv == BEAdvancedInscriber.this.topItemHandler || inv == BEAdvancedInscriber.this.botItemHandler) {
                 if (AEItems.NAME_PRESS.isSameAs(stack)) {
                     return true;
                 }

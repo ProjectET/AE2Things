@@ -3,6 +3,8 @@ package io.github.projectet.ae2things;
 import appeng.api.IAEAddonEntrypoint;
 import appeng.api.storage.StorageCells;
 import appeng.api.upgrades.Upgrades;
+import appeng.block.AEBaseEntityBlock;
+import appeng.blockentity.AEBaseBlockEntity;
 import appeng.core.AppEng;
 import appeng.core.definitions.AEBlocks;
 import appeng.core.definitions.AEItems;
@@ -40,6 +42,7 @@ public class AE2Things implements IAEAddonEntrypoint {
     public static final Block ADVANCED_INSCRIBER = new BlockAdvancedInscriber(FabricBlockSettings.of(Material.METAL).hardness(4f));
     public static BlockEntityType<BEAdvancedInscriber> ADVANCED_INSCRIBER_BE = Registry.register(Registry.BLOCK_ENTITY_TYPE, id("advanced_inscriber_be"), FabricBlockEntityTypeBuilder.create(BEAdvancedInscriber::new, ADVANCED_INSCRIBER).build());
 
+
     public static final Block CRYSTAL_GROWTH = new BlockCrystalGrowth(FabricBlockSettings.of(Material.METAL).hardness(4f));
     public static BlockEntityType<BECrystalGrowth> CRYSTAL_GROWTH_BE = Registry.register(Registry.BLOCK_ENTITY_TYPE, id("crystal_growth_be"), FabricBlockEntityTypeBuilder.create(BECrystalGrowth::new, CRYSTAL_GROWTH).build());
 
@@ -60,6 +63,7 @@ public class AE2Things implements IAEAddonEntrypoint {
 
         registerBlockwithItem("advanced_inscriber", ADVANCED_INSCRIBER);
         registerBlockwithItem("crystal_growth", CRYSTAL_GROWTH);
+        ((AEBaseEntityBlock<BEAdvancedInscriber>) ADVANCED_INSCRIBER).setBlockEntity(BEAdvancedInscriber.class, ADVANCED_INSCRIBER_BE, null, null);
 
         Upgrades.add(AEItems.SPEED_CARD, ADVANCED_INSCRIBER, 5);
 

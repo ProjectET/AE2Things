@@ -9,6 +9,7 @@ import appeng.core.localization.Side;
 import appeng.core.localization.Tooltips;
 import appeng.menu.AEBaseMenu;
 import appeng.menu.SlotSemantics;
+import appeng.menu.guisync.GuiSync;
 import appeng.menu.implementations.MenuTypeBuilder;
 import appeng.menu.implementations.UpgradeableMenu;
 import appeng.menu.interfaces.IProgressProvider;
@@ -29,41 +30,46 @@ public class AdvancedInscriberMenu extends UpgradeableMenu<BEAdvancedInscriber> 
 
     public static ScreenHandlerType<AdvancedInscriberMenu> ADVANCED_INSCRIBER_SHT = MenuTypeBuilder.create(AdvancedInscriberMenu::new, BEAdvancedInscriber.class).build("advanced_inscriber");
 
-    int processingTime;
-    int maxProcessingTime = 100;
-
     private InternalInventory inventory;
-    private BEAdvancedInscriber blockEntity;
-    public BlockPos blockPos;
     private World world;
 
     private final Slot top;
     private final Slot middle;
     private final Slot bottom;
 
+    @GuiSync(2)
+    public int maxProcessingTime = -1;
+
+    @GuiSync(3)
+    public int processingTime = -1;
+
     public AdvancedInscriberMenu(int syncId, PlayerInventory playerInventory, BEAdvancedInscriber advancedInscriber) {
         super(ADVANCED_INSCRIBER_SHT, syncId, playerInventory, advancedInscriber);
         world = playerInventory.player.world;
-        blockEntity = advancedInscriber;
         inventory = advancedInscriber.getInternalInventory();
 
         RestrictedInputSlot top = new RestrictedInputSlot(RestrictedInputSlot.PlacableItemType.INSCRIBER_PLATE, inventory, 0);
-        top.setEmptyTooltip(Tooltips.inputSlot(Side.TOP));
         this.top = this.addSlot(top, SlotSemantics.INSCRIBER_PLATE_TOP);
 
         RestrictedInputSlot bottom = new RestrictedInputSlot(RestrictedInputSlot.PlacableItemType.INSCRIBER_PLATE, inventory,
                 1);
-        bottom.setEmptyTooltip(Tooltips.inputSlot(Side.BOTTOM));
         this.bottom = this.addSlot(bottom, SlotSemantics.INSCRIBER_PLATE_BOTTOM);
 
         RestrictedInputSlot middle = new RestrictedInputSlot(RestrictedInputSlot.PlacableItemType.INSCRIBER_INPUT, inventory,
                 2);
-        middle.setEmptyTooltip(Tooltips.inputSlot(Side.LEFT, Side.RIGHT, Side.BACK, Side.FRONT));
         this.middle = this.addSlot(middle, SlotSemantics.MACHINE_INPUT);
 
         var output = new OutputSlot(inventory, 3, null);
-        output.setEmptyTooltip(Tooltips.outputSlot(Side.LEFT, Side.RIGHT, Side.BACK, Side.FRONT));
         this.addSlot(output, SlotSemantics.MACHINE_OUTPUT);
+    }
+
+    @Override
+    protected void standardDetectAndSendChanges() {
+        if (isServer()) {
+            this.maxProcessingTime = getHost().getMaxProcessingTime();
+            this.processingTime = getHost().getProcessingTime();
+        }
+        super.standardDetectAndSendChanges();
     }
 
     public boolean isValidForSlot(Slot s, ItemStack is) {
@@ -100,7 +106,7 @@ public class AdvancedInscriberMenu extends UpgradeableMenu<BEAdvancedInscriber> 
 
     @Override
     public int getCurrentProgress() {
-        return this.processingTime;
+        return processingTime;
     }
 
     @Override
