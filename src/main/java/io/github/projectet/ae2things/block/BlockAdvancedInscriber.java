@@ -43,11 +43,6 @@ public class BlockAdvancedInscriber extends AEBaseEntityBlock<BEAdvancedInscribe
             if (ai != null) {
                 if (!level.isClient()) {
                     hit.getSide();
-                    ai.getGridNode().getConnections().forEach(o -> {
-                        System.out.println("----------");
-                        System.out.println(o.a().getOwner().getClass().getSimpleName());
-                        System.out.println(o.b().getOwner().getClass().getSimpleName());
-                    });
                     MenuOpener.open(AdvancedInscriberMenu.ADVANCED_INSCRIBER_SHT, p,
                             MenuLocators.forBlockEntity(ai));
                 }
