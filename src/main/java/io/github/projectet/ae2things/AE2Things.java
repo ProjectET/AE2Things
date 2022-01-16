@@ -62,7 +62,7 @@ public class AE2Things implements IAEAddonEntrypoint {
         StorageCells.addCellGuiHandler(new DISKItemCellGuiHandler());
 
         registerBlockwithItem("advanced_inscriber", ADVANCED_INSCRIBER);
-        registerBlockwithItem("crystal_growth", CRYSTAL_GROWTH);
+//        registerBlockwithItem("crystal_growth", CRYSTAL_GROWTH);
         ((AEBaseEntityBlock<BEAdvancedInscriber>) ADVANCED_INSCRIBER).setBlockEntity(BEAdvancedInscriber.class, ADVANCED_INSCRIBER_BE, null, null);
 
         Upgrades.add(AEItems.SPEED_CARD, ADVANCED_INSCRIBER, 5);

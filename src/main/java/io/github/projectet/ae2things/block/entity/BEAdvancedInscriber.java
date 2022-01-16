@@ -10,6 +10,8 @@ import appeng.api.networking.energy.IEnergySource;
 import appeng.api.networking.ticking.IGridTickable;
 import appeng.api.networking.ticking.TickRateModulation;
 import appeng.api.networking.ticking.TickingRequest;
+import appeng.api.stacks.AEItemKey;
+import appeng.api.stacks.AEKey;
 import appeng.api.upgrades.IUpgradeInventory;
 import appeng.api.upgrades.IUpgradeableObject;
 import appeng.api.upgrades.UpgradeInventories;
@@ -17,6 +19,7 @@ import appeng.blockentity.grid.AENetworkPowerBlockEntity;
 import appeng.blockentity.misc.InscriberRecipes;
 import appeng.core.definitions.AEItems;
 import appeng.core.settings.TickRates;
+import appeng.me.helpers.MachineSource;
 import appeng.recipes.handlers.InscriberProcessType;
 import appeng.recipes.handlers.InscriberRecipe;
 import appeng.util.inv.AppEngInternalInventory;
@@ -26,6 +29,7 @@ import appeng.util.inv.filter.IAEItemFilter;
 import io.github.projectet.ae2things.AE2Things;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
@@ -245,6 +249,13 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IG
                             this.botItemHandler.extractItem(0, 1, false);
                         }
                         this.sideItemHandler.extractItem(0, 1, false);
+                    }
+
+                    if(sideItemHandler.getStackInSlot(1).getItem() != Items.AIR) {
+                        ItemStack outStack = sideItemHandler.getStackInSlot(1);
+                        AEKey itemKey = AEItemKey.of(outStack);
+                        long inserted = getMainNode().getGrid().getStorageService().getInventory().insert(itemKey, outStack.getCount(), Actionable.MODULATE, new MachineSource(this));
+                        sideItemHandler.extractItem(1, (int) inserted, false);
                     }
                 }
                 this.saveChanges();
