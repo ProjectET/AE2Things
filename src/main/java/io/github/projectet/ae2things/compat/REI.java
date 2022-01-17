@@ -1,5 +1,6 @@
 package io.github.projectet.ae2things.compat;
 
+import appeng.core.AppEng;
 import io.github.projectet.ae2things.AE2Things;
 import io.github.projectet.ae2things.gui.advancedInscriber.AdvancedInscriberRootPanel;
 import me.shedaniel.math.Rectangle;
@@ -12,19 +13,9 @@ import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.registry.Registry;
 
-import java.lang.reflect.Field;
-
 public class REI implements REIClientPlugin {
 
-    Class<?> inscriberRecipeCategory;
-    CategoryIdentifier<?> ID;
-
-    public REI() throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
-        inscriberRecipeCategory = Class.forName("appeng.integration.modules.jei.InscriberRecipeCategory");
-        Field id = inscriberRecipeCategory.getDeclaredField("ID");
-        id.setAccessible(true);
-        ID = (CategoryIdentifier<?>) id.get(null);
-    }
+    CategoryIdentifier<?> ID = CategoryIdentifier.of(AppEng.makeId("ae2.inscriber"));
 
     @Override
     public void registerScreens(ScreenRegistry registry) {
