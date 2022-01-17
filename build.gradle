@@ -38,10 +38,6 @@ repositories {
         }
     }
     maven {
-        name = "CottonMC"
-        url = "https://server.bbkr.space/artifactory/libs-release"
-    }
-    maven {
         url "https://cursemaven.com"
         content {
             includeGroup "curse.maven"
@@ -64,13 +60,9 @@ dependencies {
         exclude(group: "net.fabricmc.fabric-api")
     }
 
-    modImplementation include("io.github.cottonmc:LibGui:${project.libgui_version}")
-
     modCompileOnly("mcp.mobius.waila:wthit-api:fabric-${project.wthit_version}") {
         exclude group: "net.fabricmc.fabric-api"
     }
-
-    include modImplementation("teamreborn:energy:${project.energy_version}")
 
     modRuntimeOnly("curse.maven:techreborn-233564:3553653")
     modRuntimeOnly("curse.maven:reborncore-237903:3553654")
