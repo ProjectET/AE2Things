@@ -20,6 +20,9 @@
     ],
     "ae2:client": [
       "io.github.projectet.ae2things.client.AE2ThingsClient"
+    ],
+    "rei_plugins": [
+      "io.github.projectet.ae2things.compat.REI"
     ]
   },
   "depends": {
