@@ -23,7 +23,7 @@ public class AE2ThingsClient implements IAEAddonEntrypoint {
         ScreenRegistry.<AdvancedInscriberMenu, AdvancedInscriberRootPanel>register(AdvancedInscriberMenu.ADVANCED_INSCRIBER_SHT, (menu, playerInv, title) -> {
             ScreenStyle style;
             try {
-                style = StyleManager.loadStyleDoc("/screens/inscriber.json");
+                style = StyleManager.loadStyleDoc("/screens/advanced_inscriber.json");
             }
             catch (Exception e) {
                 throw new RuntimeException("Failed to read Screen JSON file" , e);

@@ -2,6 +2,7 @@ package io.github.projectet.ae2things.block;
 
 import appeng.block.AEBaseEntityBlock;
 import appeng.blockentity.misc.InscriberBlockEntity;
+import appeng.blockentity.misc.VibrationChamberBlockEntity;
 import appeng.menu.MenuOpener;
 import appeng.menu.implementations.InscriberMenu;
 import appeng.menu.locator.MenuLocators;
@@ -9,11 +10,14 @@ import appeng.util.InteractionUtil;
 import io.github.projectet.ae2things.AE2Things;
 import io.github.projectet.ae2things.block.entity.BEAdvancedInscriber;
 import io.github.projectet.ae2things.gui.advancedInscriber.AdvancedInscriberMenu;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.NamedScreenHandlerFactory;
+import net.minecraft.state.StateManager;
+import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -26,6 +30,20 @@ public class BlockAdvancedInscriber extends AEBaseEntityBlock<BEAdvancedInscribe
 
     public BlockAdvancedInscriber(Settings settings) {
         super(settings);
+        this.setDefaultState(this.getDefaultState().with(SMASHING, false));
+    }
+
+    public static final BooleanProperty SMASHING = BooleanProperty.of("smashing");
+
+    @Override
+    protected BlockState updateBlockStateFromBlockEntity(BlockState currentState, BEAdvancedInscriber be) {
+        return currentState.with(SMASHING, be.isSmash());
+    }
+
+    @Override
+    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+        super.appendProperties(builder);
+        builder.add(SMASHING);
     }
 
     @Nullable

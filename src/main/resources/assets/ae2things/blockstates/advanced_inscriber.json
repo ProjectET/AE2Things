@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "smashing=false": {
+      "model": "ae2things:block/advanced_inscriber"
+    },
+    "smashing=true": {
+      "model": "ae2things:block/advanced_inscriber_on"
+    }
+  }
+}

@@ -6,5 +6,6 @@
   "item.ae2things.disk_housing": "ME Item DISK Housing",
   "block.ae2things.advanced_inscriber": "Advanced Inscriber",
   "block.ae2things.crystal_growth": "Crystal Growth Chamber",
-  "itemGroup.ae2things.item_group": "AE2Things"
+  "itemGroup.ae2things.item_group": "AE2Things",
+  "gui.ae2things.Advanced_Inscriber": "Advanced Inscriber"
 }

@@ -5,9 +5,6 @@ import appeng.api.upgrades.IUpgradeableObject;
 import appeng.blockentity.misc.InscriberRecipes;
 import appeng.core.definitions.AEItems;
 import appeng.core.definitions.ItemDefinition;
-import appeng.core.localization.Side;
-import appeng.core.localization.Tooltips;
-import appeng.menu.AEBaseMenu;
 import appeng.menu.SlotSemantics;
 import appeng.menu.guisync.GuiSync;
 import appeng.menu.implementations.MenuTypeBuilder;
@@ -15,15 +12,12 @@ import appeng.menu.implementations.UpgradeableMenu;
 import appeng.menu.interfaces.IProgressProvider;
 import appeng.menu.slot.OutputSlot;
 import appeng.menu.slot.RestrictedInputSlot;
-import dev.architectury.registry.menu.MenuRegistry;
 import io.github.projectet.ae2things.block.entity.BEAdvancedInscriber;
-import io.github.projectet.ae2things.inventory.CombinedInventory;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.slot.Slot;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class AdvancedInscriberMenu extends UpgradeableMenu<BEAdvancedInscriber> implements IProgressProvider, IUpgradeableObject {
