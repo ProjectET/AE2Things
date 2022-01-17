@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "ae2things:advanced_inscriber",
+      "required": false
+    }
+  ]
+}

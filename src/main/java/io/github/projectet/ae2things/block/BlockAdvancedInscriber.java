@@ -30,6 +30,7 @@ public class BlockAdvancedInscriber extends AEBaseEntityBlock<BEAdvancedInscribe
 
     public BlockAdvancedInscriber(Settings settings) {
         super(settings);
+        settings.requiresTool();
         this.setDefaultState(this.getDefaultState().with(SMASHING, false));
     }
 
