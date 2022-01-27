@@ -4,11 +4,12 @@ import appeng.api.config.IncludeExclude;
 import appeng.api.storage.cells.ICellHandler;
 import appeng.api.storage.cells.ISaveProvider;
 import appeng.core.localization.GuiText;
+import appeng.core.localization.Tooltips;
 import io.github.projectet.ae2things.item.DISKDrive;
-import io.github.projectet.ae2things.util.Constants;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 import java.util.List;
 
@@ -27,22 +28,27 @@ public class DISKCellHandler implements ICellHandler {
     }
 
     public void addCellInformationToTooltip(ItemStack stack, List<Text> lines) {
-        if(stack.getOrCreateNbt().contains(Constants.DISKUUID)) {
-            lines.add(new LiteralText(stack.getOrCreateNbt().getLong(DISKCellInventory.ITEM_COUNT_TAG) + " ").append(GuiText.Of.text())
-                    .append(" " + ((DISKDrive) stack.getItem()).getBytes(stack) + "").append(GuiText.BytesUsed.text()));
+        var handler = getCellInventory(stack, null);
 
-            /*if (handler.isPreformatted()) {
-                var list = (handler.getPartitionListMode() == IncludeExclude.WHITELIST ? GuiText.Included
-                        : GuiText.Excluded)
-                        .text();
+        if(handler == null)
+            return;
 
-                if (handler.isFuzzy()) {
-                    lines.add(GuiText.Partitioned.withSuffix(" - ").append(list).append(" ").append(GuiText.Fuzzy.text()));
-                } else {
-                    lines.add(
-                            GuiText.Partitioned.withSuffix(" - ").append(list).append(" ").append(GuiText.Precise.text()));
-                }
-            }*/
+        if(handler.hasDiskUUID()) {
+            lines.add(new LiteralText("Disk UUID: ").formatted(Formatting.GRAY).append(new LiteralText(handler.getDiskUUID().toString()).formatted(Formatting.AQUA)));
+            lines.add(Tooltips.bytesUsed(handler.getNbtItemCount(), handler.getTotalBytes()));
+        }
+
+        if (handler.isPreformatted()) {
+            var list = (handler.getPartitionListMode() == IncludeExclude.WHITELIST ? GuiText.Included
+                    : GuiText.Excluded)
+                    .text();
+
+            if (handler.isFuzzy()) {
+                lines.add(GuiText.Partitioned.withSuffix(" - ").append(list).append(" ").append(GuiText.Fuzzy.text()));
+            } else {
+                lines.add(
+                        GuiText.Partitioned.withSuffix(" - ").append(list).append(" ").append(GuiText.Precise.text()));
+            }
         }
     }
 }

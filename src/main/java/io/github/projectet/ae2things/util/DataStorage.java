@@ -6,6 +6,9 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 
 public class DataStorage {
+
+    public static final DataStorage EMPTY = new DataStorage();
+
     public NbtList stackKeys;
     public long[] stackAmounts;
     public long itemCount;
@@ -40,9 +43,4 @@ public class DataStorage {
 
         return new DataStorage(stackKeys, stackAmounts, itemCount);
     }
-
-    public long getStackAmountAt(int i) {
-        return stackAmounts[i];
-    }
-
 }

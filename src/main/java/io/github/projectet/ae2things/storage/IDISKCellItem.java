@@ -1,8 +1,11 @@
 package io.github.projectet.ae2things.storage;
 
+import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.AEKey;
 import appeng.api.stacks.AEKeyType;
+import appeng.api.storage.cells.IBasicCellItem;
 import appeng.api.storage.cells.ICellWorkbenchItem;
+import appeng.items.storage.BasicStorageCell;
 import appeng.me.cells.BasicCellHandler;
 import appeng.util.ConfigInventory;
 import com.google.common.base.Preconditions;
@@ -34,6 +37,9 @@ public interface IDISKCellItem extends ICellWorkbenchItem {
      * @return true to preventAdditionOfItem
      */
     default boolean isBlackListed(ItemStack cellItem, AEKey requestedAddition) {
+        if(((AEItemKey) requestedAddition).getItem() instanceof IBasicCellItem) {
+            return BasicCellHandler.INSTANCE.getCellInventory(((AEItemKey) requestedAddition).toStack(), null).getUsedBytes() > 0;
+        }
         return false;
     }
 

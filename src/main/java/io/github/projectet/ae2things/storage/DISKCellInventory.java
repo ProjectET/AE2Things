@@ -3,7 +3,6 @@ package io.github.projectet.ae2things.storage;
 import appeng.api.config.Actionable;
 import appeng.api.config.FuzzyMode;
 import appeng.api.config.IncludeExclude;
-import appeng.api.inventories.InternalInventory;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.AEKey;
@@ -79,11 +78,14 @@ public class DISKCellInventory implements StorageCell {
     }
 
     private DataStorage getDiskStorage() {
-        return AE2Things.STORAGE_INSTANCE.getOrCreateDisk(getDiskUUID());
+        if(getDiskUUID() != null)
+            return getStorageInstance().getOrCreateDisk(getDiskUUID());
+        else
+            return DataStorage.EMPTY;
     }
 
     private void initData() {
-        if(i.hasNbt()) {
+        if(hasDiskUUID()) {
             this.storedItems = getDiskStorage().stackAmounts.length;
             this.storedItemCount = getDiskStorage().itemCount;
         }
@@ -120,10 +122,20 @@ public class DISKCellInventory implements StorageCell {
 
     @Override
     public CellState getStatus() {
-        if (this.getStoredItemTypes() == 0) {
+        if (this.getStoredItemCount() == 0) {
             return CellState.EMPTY;
         }
         if (this.canHoldNewItem()) {
+            return CellState.NOT_EMPTY;
+        }
+        return CellState.FULL;
+    }
+
+    public CellState getClientStatus() {
+        if (this.getNbtItemCount() == 0) {
+            return CellState.EMPTY;
+        }
+        if ((getNbtItemCount() > 0 && getNbtItemCount() != getTotalBytes())) {
             return CellState.NOT_EMPTY;
         }
         return CellState.FULL;
@@ -141,9 +153,10 @@ public class DISKCellInventory implements StorageCell {
         }
 
         if(storedItemCount == 0) {
-            if(i.hasNbt()) {
+            if(hasDiskUUID()) {
                 getStorageInstance().removeDisk(getDiskUUID());
-                i.setNbt(null);
+                i.getNbt().remove(Constants.DISKUUID);
+                i.getNbt().remove(DISKCellInventory.ITEM_COUNT_TAG);
                 initData();
             }
             return;
@@ -166,7 +179,7 @@ public class DISKCellInventory implements StorageCell {
         }
 
         if (keys.isEmpty()) {
-            AE2Things.STORAGE_INSTANCE.updateDisk(getDiskUUID(), new DataStorage());
+            getStorageInstance().updateDisk(getDiskUUID(), new DataStorage());
         } else {
             getStorageInstance().modifyDisk(getDiskUUID(), keys, amounts.toArray(new long[0]), itemCount);
         }
@@ -200,8 +213,14 @@ public class DISKCellInventory implements StorageCell {
         return new DISKCellInventory(cellType, stack, saveProvider);
     }
 
-    private UUID getDiskUUID() {
-        return i.getOrCreateNbt().getUuid(Constants.DISKUUID);
+    public boolean hasDiskUUID() {
+        return i.hasNbt() && i.getOrCreateNbt().contains(Constants.DISKUUID);
+    }
+
+    public UUID getDiskUUID() {
+        if(hasDiskUUID())
+            return i.getOrCreateNbt().getUuid(Constants.DISKUUID);
+        else return null;
     }
 
     private boolean isStorageCell(AEItemKey key) {
@@ -322,7 +341,7 @@ public class DISKCellInventory implements StorageCell {
             }
         }
 
-        if(!i.hasNbt()) {
+        if(!hasDiskUUID()) {
             i.getOrCreateNbt().putUuid(Constants.DISKUUID, UUID.randomUUID());
             getStorageInstance().getOrCreateDisk(getDiskUUID());
             loadCellItems();
@@ -376,11 +395,14 @@ public class DISKCellInventory implements StorageCell {
     }
 
     public long getFreeBytes() {
-        return this.getTotalBytes() - this.getUsedBytes();
+        return this.getTotalBytes() - this.getStoredItemCount();
     }
 
-    public long getUsedBytes() {
-        return getStoredItemCount();
+    public long getNbtItemCount() {
+        if(hasDiskUUID()) {
+            return i.getNbt().getLong(DISKCellInventory.ITEM_COUNT_TAG);
+        }
+        return 0;
     }
 
     public long getStoredItemCount() {

@@ -2,6 +2,8 @@ package io.github.projectet.ae2things.item;
 
 import appeng.api.config.FuzzyMode;
 import appeng.api.stacks.AEKeyType;
+import appeng.api.storage.StorageCells;
+import appeng.api.storage.cells.CellState;
 import appeng.api.upgrades.IUpgradeInventory;
 import appeng.api.upgrades.UpgradeInventories;
 import appeng.hooks.AEToolItem;
@@ -9,8 +11,8 @@ import appeng.items.contents.CellConfig;
 import appeng.util.ConfigInventory;
 import appeng.util.InteractionUtil;
 import io.github.projectet.ae2things.AE2Things;
+import io.github.projectet.ae2things.storage.DISKCellHandler;
 import io.github.projectet.ae2things.storage.IDISKCellItem;
-import io.github.projectet.ae2things.util.Constants;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -48,11 +50,6 @@ public class DISKDrive extends Item implements IDISKCellItem, AEToolItem {
     @Override
     public AEKeyType getKeyType() {
         return AEKeyType.items();
-    }
-
-    @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        super.inventoryTick(stack, world, entity, slot, selected);
     }
 
     @Override
@@ -148,9 +145,18 @@ public class DISKDrive extends Item implements IDISKCellItem, AEToolItem {
     @Override
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
         tooltip.add(new LiteralText("Deep Item Storage disK - Storage for dummies").formatted(Formatting.DARK_GRAY, Formatting.ITALIC));
-        if(stack.getOrCreateNbt().contains(Constants.DISKUUID)) {
-            tooltip.add(new LiteralText("Disk UUID: " + stack.getOrCreateNbt().getUuid(Constants.DISKUUID)));
-            addCellInformationToTooltip(stack, tooltip);
+        addCellInformationToTooltip(stack, tooltip);
+    }
+
+    public static int getColor(ItemStack stack, int tintIndex) {
+        if (tintIndex == 1) {
+            // Determine LED color
+            var cellInv = DISKCellHandler.INSTANCE.getCellInventory(stack, null);
+            var cellStatus = cellInv != null ? cellInv.getClientStatus() : CellState.EMPTY;
+            return cellStatus.getStateColor();
+        } else {
+            // White
+            return 0xFFFFFF;
         }
     }
 }

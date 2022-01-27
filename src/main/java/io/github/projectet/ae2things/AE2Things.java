@@ -33,7 +33,7 @@ public class AE2Things implements IAEAddonEntrypoint {
 
     public static final ItemGroup ITEM_GROUP = FabricItemGroupBuilder.build(id("item_group"), () -> new ItemStack(AETItems.DISK_HOUSING));
 
-    public static StorageManager STORAGE_INSTANCE;
+    public static StorageManager STORAGE_INSTANCE = new StorageManager();
 
     public static final Block ADVANCED_INSCRIBER = new BlockAdvancedInscriber(FabricBlockSettings.of(Material.METAL).hardness(4f));
     public static BlockEntityType<BEAdvancedInscriber> ADVANCED_INSCRIBER_BE = Registry.register(Registry.BLOCK_ENTITY_TYPE, id("advanced_inscriber_be"), FabricBlockEntityTypeBuilder.create(BEAdvancedInscriber::new, ADVANCED_INSCRIBER).build());

@@ -5,9 +5,11 @@ import appeng.client.gui.style.ScreenStyle;
 import appeng.client.gui.style.StyleManager;
 import io.github.projectet.ae2things.gui.advancedInscriber.AdvancedInscriberMenu;
 import io.github.projectet.ae2things.gui.advancedInscriber.AdvancedInscriberRootPanel;
+import io.github.projectet.ae2things.item.AETItems;
 import io.github.projectet.ae2things.item.DISKDrive;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.screenhandler.v1.ScreenRegistry;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.Slot;
@@ -18,6 +20,7 @@ import java.io.FileNotFoundException;
 @Environment(EnvType.CLIENT)
 public class AE2ThingsClient implements IAEAddonEntrypoint {
 
+    @SuppressWarnings("RedundantTypeArguments")
     @Override
     public void onAe2Initialized() {
         ScreenRegistry.<AdvancedInscriberMenu, AdvancedInscriberRootPanel>register(AdvancedInscriberMenu.ADVANCED_INSCRIBER_SHT, (menu, playerInv, title) -> {
@@ -31,5 +34,7 @@ public class AE2ThingsClient implements IAEAddonEntrypoint {
 
             return new AdvancedInscriberRootPanel(menu, playerInv, title, style);
         });
+
+        ColorProviderRegistry.ITEM.register(DISKDrive::getColor, AETItems.DISK_DRIVE_1K, AETItems.DISK_DRIVE_4K, AETItems.DISK_DRIVE_16K, AETItems.DISK_DRIVE_64K);
     }
 }
