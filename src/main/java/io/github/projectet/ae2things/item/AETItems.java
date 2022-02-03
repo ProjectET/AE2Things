@@ -3,20 +3,18 @@ package io.github.projectet.ae2things.item;
 import appeng.api.client.StorageCellModels;
 import appeng.core.definitions.AEItems;
 import io.github.projectet.ae2things.AE2Things;
-import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
-import net.minecraft.client.color.item.ItemColorProvider;
 import net.minecraft.item.Item;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
 public class AETItems {
 
-    public static final Item DISK_HOUSING = new Item(new FabricItemSettings().maxCount(64).group(AE2Things.ITEM_GROUP));
-    public static final Item DISK_DRIVE_1K = new DISKDrive(new FabricItemSettings().maxCount(1).group(AE2Things.ITEM_GROUP), AEItems.CELL_COMPONENT_1K.asItem(), 1, 0.5f);
-    public static final Item DISK_DRIVE_4K = new DISKDrive(new FabricItemSettings().maxCount(1).group(AE2Things.ITEM_GROUP), AEItems.CELL_COMPONENT_4K.asItem(), 4, 1.0f);
-    public static final Item DISK_DRIVE_16K = new DISKDrive(new FabricItemSettings().maxCount(1).group(AE2Things.ITEM_GROUP), AEItems.CELL_COMPONENT_16K.asItem(), 16, 1.5f);
-    public static final Item DISK_DRIVE_64K = new DISKDrive(new FabricItemSettings().maxCount(1).group(AE2Things.ITEM_GROUP), AEItems.CELL_COMPONENT_64K.asItem(), 64, 2.0f);
+    public static final Item DISK_HOUSING = new Item(new FabricItemSettings().maxCount(64).group(AE2Things.ITEM_GROUP).fireproof());
+    public static final Item DISK_DRIVE_1K = new DISKDrive(AEItems.CELL_COMPONENT_1K.asItem(), 1, 0.5f);
+    public static final Item DISK_DRIVE_4K = new DISKDrive(AEItems.CELL_COMPONENT_4K.asItem(), 4, 1.0f);
+    public static final Item DISK_DRIVE_16K = new DISKDrive(AEItems.CELL_COMPONENT_16K.asItem(), 16, 1.5f);
+    public static final Item DISK_DRIVE_64K = new DISKDrive(AEItems.CELL_COMPONENT_64K.asItem(), 64, 2.0f);
 
     public static final Identifier MODEL_DISK_DRIVE_1K = new Identifier("ae2things:model/drive/cells/disk_1k");
     public static final Identifier MODEL_DISK_DRIVE_4K = new Identifier("ae2things:model/drive/cells/disk_4k");

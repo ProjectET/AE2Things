@@ -2,7 +2,6 @@ package io.github.projectet.ae2things.item;
 
 import appeng.api.config.FuzzyMode;
 import appeng.api.stacks.AEKeyType;
-import appeng.api.storage.StorageCells;
 import appeng.api.storage.cells.CellState;
 import appeng.api.upgrades.IUpgradeInventory;
 import appeng.api.upgrades.UpgradeInventories;
@@ -13,8 +12,8 @@ import appeng.util.InteractionUtil;
 import io.github.projectet.ae2things.AE2Things;
 import io.github.projectet.ae2things.storage.DISKCellHandler;
 import io.github.projectet.ae2things.storage.IDISKCellItem;
+import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.client.item.TooltipContext;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
@@ -40,8 +39,8 @@ public class DISKDrive extends Item implements IDISKCellItem, AEToolItem {
     private final double idleDrain;
     private final ItemConvertible coreItem;
 
-    public DISKDrive(Settings settings, ItemConvertible coreItem, int kilobytes, double idleDrain) {
-        super(settings.group(AE2Things.ITEM_GROUP));
+    public DISKDrive(ItemConvertible coreItem, int kilobytes, double idleDrain) {
+        super(new FabricItemSettings().maxCount(1).group(AE2Things.ITEM_GROUP).fireproof());
         this.bytes = kilobytes * 1000;
         this.coreItem = coreItem;
         this.idleDrain = idleDrain;

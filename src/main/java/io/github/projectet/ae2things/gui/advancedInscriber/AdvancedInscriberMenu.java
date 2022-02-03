@@ -59,7 +59,7 @@ public class AdvancedInscriberMenu extends UpgradeableMenu<BEAdvancedInscriber> 
 
     @Override
     protected void standardDetectAndSendChanges() {
-        if (isServer()) {
+        if (isServerSide()) {
             this.maxProcessingTime = getHost().getMaxProcessingTime();
             this.processingTime = getHost().getProcessingTime();
         }

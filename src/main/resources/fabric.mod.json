@@ -28,7 +28,7 @@
   "depends": {
     "fabricloader": ">=0.12.12",
     "fabric": "*",
-    "ae2": ">=10.0.0-beta.3",
+    "ae2": ">=10.1.0-beta.1",
     "minecraft": "1.18.1"
   }
 }

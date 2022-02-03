@@ -1,46 +1,51 @@
 package io.github.projectet.ae2things.block.entity;
 
+import appeng.api.inventories.InternalInventory;
+import appeng.api.networking.IGridNode;
+import appeng.api.networking.ticking.IGridTickable;
+import appeng.api.networking.ticking.TickRateModulation;
+import appeng.api.networking.ticking.TickingRequest;
+import appeng.api.upgrades.IUpgradeInventory;
+import appeng.api.upgrades.IUpgradeableObject;
+import appeng.api.upgrades.UpgradeInventories;
+import appeng.blockentity.grid.AENetworkPowerBlockEntity;
+import appeng.util.inv.AppEngInternalInventory;
 import io.github.projectet.ae2things.AE2Things;
-import io.github.projectet.ae2things.inventory.DefaultInventory;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.inventory.SidedInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 
-public class BECrystalGrowth extends BlockEntity implements DefaultInventory, SidedInventory {
+public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridTickable, IUpgradeableObject {
 
-    DefaultedList<ItemStack> inventory = DefaultedList.ofSize(30);
+    private final AppEngInternalInventory inventory = new AppEngInternalInventory(this, 27);
+    private IUpgradeInventory upgrades;
 
     public BECrystalGrowth(BlockPos pos, BlockState state) {
         super(AE2Things.CRYSTAL_GROWTH_BE, pos, state);
+        upgrades = UpgradeInventories.forMachine(AE2Things.CRYSTAL_GROWTH, 3, this::saveChanges);
     }
 
     @Override
-    public DefaultedList<ItemStack> getItems() {
+    public TickingRequest getTickingRequest(IGridNode node) {
         return null;
     }
 
     @Override
-    public int[] getAvailableSlots(Direction side) {
-        return new int[0];
+    public TickRateModulation tickingRequest(IGridNode node, int ticksSinceLastCall) {
+        return null;
     }
 
     @Override
-    public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {
-        return false;
+    public InternalInventory getInternalInventory() {
+        return inventory;
     }
 
     @Override
-    public boolean canExtract(int slot, ItemStack stack, Direction dir) {
-        return false;
+    public void onChangeInventory(InternalInventory inv, int slot) {
+
     }
 
-    public static void tick(World world, BlockPos pos, BlockState state, BECrystalGrowth blockEntity) {
-
+    @Override
+    public IUpgradeInventory getUpgrades() {
+        return upgrades;
     }
 }
