@@ -66,6 +66,7 @@ public class AdvancedInscriberMenu extends UpgradeableMenu<BEAdvancedInscriber> 
         super.standardDetectAndSendChanges();
     }
 
+    @Override
     public boolean isValidForSlot(Slot s, ItemStack is) {
         final ItemStack top = inventory.getStackInSlot(0);
         final ItemStack bot = inventory.getStackInSlot(1);

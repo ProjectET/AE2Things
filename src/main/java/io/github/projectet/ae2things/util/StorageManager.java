@@ -58,8 +58,8 @@ public class StorageManager extends PersistentState {
         markDirty();
     }
 
-    public NbtCompound getOrCreateDiskNbt(UUID uuid) {
-        return getOrCreateDisk(uuid).toNbt();
+    public boolean hasUUID(UUID uuid) {
+        return disks.containsKey(uuid);
     }
 
     public DataStorage getOrCreateDisk(UUID uuid) {

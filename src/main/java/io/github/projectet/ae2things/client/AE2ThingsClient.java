@@ -5,6 +5,8 @@ import appeng.client.gui.style.ScreenStyle;
 import appeng.client.gui.style.StyleManager;
 import io.github.projectet.ae2things.gui.advancedInscriber.AdvancedInscriberMenu;
 import io.github.projectet.ae2things.gui.advancedInscriber.AdvancedInscriberRootPanel;
+import io.github.projectet.ae2things.gui.crystalGrowth.CrystalGrowthMenu;
+import io.github.projectet.ae2things.gui.crystalGrowth.CrystalGrowthRootPanel;
 import io.github.projectet.ae2things.item.AETItems;
 import io.github.projectet.ae2things.item.DISKDrive;
 import net.fabricmc.api.EnvType;
@@ -33,6 +35,17 @@ public class AE2ThingsClient implements IAEAddonEntrypoint {
             }
 
             return new AdvancedInscriberRootPanel(menu, playerInv, title, style);
+        });
+        ScreenRegistry.<CrystalGrowthMenu, CrystalGrowthRootPanel>register(CrystalGrowthMenu.CRYSTAL_GROWTH_SHT, (menu, playerInv, title) -> {
+            ScreenStyle style;
+            try {
+                style = StyleManager.loadStyleDoc("/screens/crystal_growth.json");
+            }
+            catch (Exception e) {
+                throw new RuntimeException("Failed to read Screen JSON file" , e);
+            }
+
+            return new CrystalGrowthRootPanel(menu, playerInv, title, style);
         });
 
         ColorProviderRegistry.ITEM.register(DISKDrive::getColor, AETItems.DISK_DRIVE_1K, AETItems.DISK_DRIVE_4K, AETItems.DISK_DRIVE_16K, AETItems.DISK_DRIVE_64K);
