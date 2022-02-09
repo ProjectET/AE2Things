@@ -5,12 +5,16 @@ import appeng.menu.MenuOpener;
 import appeng.menu.locator.MenuLocators;
 import appeng.util.InteractionUtil;
 import io.github.projectet.ae2things.AE2Things;
+import io.github.projectet.ae2things.block.entity.BEAdvancedInscriber;
 import io.github.projectet.ae2things.block.entity.BECrystalGrowth;
 import io.github.projectet.ae2things.gui.crystalGrowth.CrystalGrowthMenu;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.state.StateManager;
+import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -23,6 +27,21 @@ public class BlockCrystalGrowth extends AEBaseEntityBlock<BECrystalGrowth> {
 
     public BlockCrystalGrowth(Settings settings) {
         super(settings);
+        settings.requiresTool();
+        this.setDefaultState(this.getDefaultState().with(WORKING, false));
+    }
+
+    public static final BooleanProperty WORKING = BooleanProperty.of("working");
+
+    @Override
+    protected BlockState updateBlockStateFromBlockEntity(BlockState currentState, BECrystalGrowth be) {
+        return currentState.with(WORKING, be.hasWork());
+    }
+
+    @Override
+    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+        super.appendProperties(builder);
+        builder.add(WORKING);
     }
 
     @Nullable

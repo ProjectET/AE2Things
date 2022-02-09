@@ -15,7 +15,7 @@ import java.util.Set;
 
 public class CrystalGrowthSlot extends AppEngSlot {
 
-    Set<Item> validItems = new HashSet<>(List.of(Items.REDSTONE, Items.QUARTZ, AEItems.CERTUS_QUARTZ_CRYSTAL_CHARGED.asItem()));
+    public static Set<Item> validItems = new HashSet<>(List.of(Items.REDSTONE, Items.QUARTZ, AEItems.CERTUS_QUARTZ_CRYSTAL_CHARGED.asItem()));
 
     public CrystalGrowthSlot(InternalInventory inv, int invSlot) {
         super(inv, invSlot);
