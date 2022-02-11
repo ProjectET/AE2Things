@@ -95,22 +95,35 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
     public TickRateModulation tickingRequest(IGridNode node, int ticksSinceLastCall) {
         if(hasWork()) {
             final int speedFactor = 1 + this.upgrades.getInstalledUpgrades(AEItems.SPEED_CARD);
+            final IEnergyService[] eg = new IEnergyService[1];
+            IEnergySource src = this;
             getMainNode().ifPresent(iGrid -> {
-                IEnergyService eg = iGrid.getEnergyService();
-                IEnergySource src = this;
-
-                final int powerConsumption = 10 * speedFactor;
-                final double powerThreshold = powerConsumption - 0.01;
-                double powerReq = this.extractAEPower(powerConsumption, Actionable.SIMULATE, PowerMultiplier.CONFIG);
-                if (powerReq <= powerThreshold) {
-                    src = eg;
-                    powerReq = eg.extractAEPower(powerConsumption, Actionable.SIMULATE, PowerMultiplier.CONFIG);
-                }
-
-                if (powerReq > powerThreshold) {
-                    src.extractAEPower(powerConsumption, Actionable.MODULATE, PowerMultiplier.CONFIG);
-                }
+                eg[0] = iGrid.getEnergyService();
             });
+            if(eg[0] == null) {
+                return TickRateModulation.IDLE;
+            }
+            final int powerConsumption = 10 * speedFactor;
+            final double powerThreshold = powerConsumption - 0.01;
+            double powerReq = this.extractAEPower(powerConsumption, Actionable.SIMULATE, PowerMultiplier.CONFIG);
+            if (powerReq <= powerThreshold) {
+                src = eg[0];
+                powerReq = eg[0].extractAEPower(powerConsumption, Actionable.SIMULATE, PowerMultiplier.CONFIG);
+            }
+
+            if (powerReq > powerThreshold) {
+                if(!isWorking) {
+                    isWorking = true;
+                    markForUpdate();
+                }
+                src.extractAEPower(powerConsumption, Actionable.MODULATE, PowerMultiplier.CONFIG);
+            } else {
+                if(isWorking) {
+                    isWorking = false;
+                    this.markForUpdate();
+                }
+                return TickRateModulation.IDLE;
+            }
 
             for (Integer slot : cachedGrowable.stream().toList()) {
                 ItemStack crystal = inventory.getStackInSlot(slot);
