@@ -38,10 +38,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridTickable, IUpgradeableObject {
 
@@ -52,7 +49,7 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
 
     private boolean isWorking;
 
-    private Set<Integer> cachedGrowable = new HashSet<>();
+    private final Set<Integer> cachedGrowable = new HashSet<>();
 
     public BECrystalGrowth(BlockPos pos, BlockState state) {
         super(AE2Things.CRYSTAL_GROWTH_BE, pos, state);
@@ -70,11 +67,15 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
 
     @Override
     public TickingRequest getTickingRequest(IGridNode node) {
-        return new TickingRequest(TickRates.Inscriber, !this.hasWork(), false);
+        return new TickingRequest(TickRates.Inscriber, !this.hasWork(), true);
+    }
+
+    public boolean isWorking() {
+        return isWorking;
     }
 
     public boolean hasWork() {
-        return isWorking;
+        return hasFluixIngredients() || !cachedGrowable.isEmpty();
     }
 
     private boolean hasFluixIngredients() {
@@ -111,14 +112,14 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
                 }
             });
 
-            Set<Integer> tempCache = cachedGrowable;
-            for (Integer slot : tempCache.stream().toList()) {
+            for (Integer slot : cachedGrowable.stream().toList()) {
                 ItemStack crystal = inventory.getStackInSlot(slot);
                 if(!(crystal.getItem() instanceof IGrowableCrystal)) {
                     cachedGrowable.remove(slot);
                     continue;
                 }
                 inventory.setItemDirect(slot, triggerGrowth(crystal, 20, speedFactor));
+                this.saveChanges();
             }
             if(hasFluixIngredients()) {
                 try(Transaction context = Transaction.openOuter()) {
@@ -129,6 +130,7 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
                     inventory.addItems(new ItemStack(AEItems.FLUIX_DUST, 2));
                     if (redstone == 1 && chargedCertus == 1 && quartz == 1) {
                         context.commit();
+                        this.saveChanges();
                     }
                 }
             }
@@ -187,12 +189,16 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
     public void writeNbt(NbtCompound data) {
         super.writeNbt(data);
         this.upgrades.writeToNBT(data, "upgrades");
+        data.putIntArray("cache", this.cachedGrowable.stream().toList());
+        data.putBoolean("working", isWorking);
     }
 
     @Override
     public void loadTag(NbtCompound data) {
         super.loadTag(data);
         this.upgrades.readFromNBT(data, "upgrades");
+        this.cachedGrowable.addAll(Arrays.stream(data.getIntArray("cache")).boxed().toList());
+        this.isWorking = data.getBoolean("working");
     }
 
     @Override

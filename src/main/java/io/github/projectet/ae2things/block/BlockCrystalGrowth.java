@@ -5,7 +5,6 @@ import appeng.menu.MenuOpener;
 import appeng.menu.locator.MenuLocators;
 import appeng.util.InteractionUtil;
 import io.github.projectet.ae2things.AE2Things;
-import io.github.projectet.ae2things.block.entity.BEAdvancedInscriber;
 import io.github.projectet.ae2things.block.entity.BECrystalGrowth;
 import io.github.projectet.ae2things.gui.crystalGrowth.CrystalGrowthMenu;
 import net.minecraft.block.Block;
@@ -35,7 +34,7 @@ public class BlockCrystalGrowth extends AEBaseEntityBlock<BECrystalGrowth> {
 
     @Override
     protected BlockState updateBlockStateFromBlockEntity(BlockState currentState, BECrystalGrowth be) {
-        return currentState.with(WORKING, be.hasWork());
+        return currentState.with(WORKING, be.isWorking());
     }
 
     @Override
