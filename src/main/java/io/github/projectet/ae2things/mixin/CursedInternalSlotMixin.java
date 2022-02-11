@@ -25,14 +25,16 @@ import java.util.UUID;
 @Mixin(ScreenHandler.class)
 public abstract class CursedInternalSlotMixin {
 
+    //TODO: Test in AOF modpack
+
     @Final
     @Shadow
     public DefaultedList<Slot> slots;
 
-    @Inject(method = "internalOnSlotClick", at = @At(value = "INVOKE", target = "net/minecraft/screen/slot/Slot.hasStack()Z"), slice = @Slice(from = @At(value = "INVOKE", target = "net/minecraft/item/ItemStack.copy ()Lnet/minecraft/item/ItemStack;")), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
+    @Inject(method = "internalOnSlotClick", at = @At(value = "INVOKE", target = "net/minecraft/item/ItemStack.copy ()Lnet/minecraft/item/ItemStack;"), slice = @Slice(from = @At(value = "INVOKE", target = "net/minecraft/screen/slot/Slot.hasStack()Z")), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
     public void CLONE(int slotIndex, int button, SlotActionType actionType, PlayerEntity player, CallbackInfo ci) {
         Slot i = this.slots.get(slotIndex);
-        if(i.getStack().getItem() instanceof DISKDrive && i.getStack().hasNbt()) {
+        if(DISKCellInventory.hasDiskUUID(i.getStack())) {
                 DataStorage storage = AE2Things.STORAGE_INSTANCE.getOrCreateDisk(i.getStack().getOrCreateNbt().getUuid(Constants.DISKUUID));
                 ItemStack newStack = new ItemStack(i.getStack().getItem());
                 UUID id = UUID.randomUUID();

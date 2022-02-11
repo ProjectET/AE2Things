@@ -217,6 +217,13 @@ public class DISKCellInventory implements StorageCell {
         return i.hasNbt() && i.getOrCreateNbt().contains(Constants.DISKUUID);
     }
 
+    public static boolean hasDiskUUID(ItemStack disk) {
+        if(disk.getItem() instanceof IDISKCellItem) {
+            return disk.hasNbt() && disk.getOrCreateNbt().contains(Constants.DISKUUID);
+        }
+        return false;
+    }
+
     public UUID getDiskUUID() {
         if(hasDiskUUID())
             return i.getOrCreateNbt().getUuid(Constants.DISKUUID);
