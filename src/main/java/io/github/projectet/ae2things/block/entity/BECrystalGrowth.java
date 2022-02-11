@@ -112,13 +112,13 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
             }
 
             if (powerReq > powerThreshold) {
-                if(!isWorking) {
+                if(!isWorking()) {
                     isWorking = true;
                     markForUpdate();
                 }
                 src.extractAEPower(powerConsumption, Actionable.MODULATE, PowerMultiplier.CONFIG);
             } else {
-                if(isWorking) {
+                if(isWorking()) {
                     isWorking = false;
                     this.markForUpdate();
                 }
