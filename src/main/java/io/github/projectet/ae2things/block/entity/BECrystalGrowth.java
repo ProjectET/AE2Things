@@ -11,6 +11,9 @@ import appeng.api.networking.energy.IEnergySource;
 import appeng.api.networking.ticking.IGridTickable;
 import appeng.api.networking.ticking.TickRateModulation;
 import appeng.api.networking.ticking.TickingRequest;
+import appeng.api.stacks.AEItemKey;
+import appeng.api.stacks.AEKey;
+import appeng.api.storage.MEStorage;
 import appeng.api.upgrades.IUpgradeInventory;
 import appeng.api.upgrades.IUpgradeableObject;
 import appeng.api.upgrades.UpgradeInventories;
@@ -18,6 +21,7 @@ import appeng.blockentity.grid.AENetworkPowerBlockEntity;
 import appeng.core.definitions.AEItems;
 import appeng.core.settings.TickRates;
 import appeng.items.misc.CrystalSeedItem;
+import appeng.me.helpers.MachineSource;
 import appeng.util.inv.AppEngInternalInventory;
 import appeng.util.inv.FilteredInternalInventory;
 import appeng.util.inv.filter.IAEItemFilter;
@@ -84,7 +88,7 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
             boolean hasRedstone = inv.simulateExtract(ItemVariant.of(Items.REDSTONE), 1, transaction) == 1;
             boolean hasChargedCertus = inv.simulateExtract(ItemVariant.of(AEItems.CERTUS_QUARTZ_CRYSTAL_CHARGED.asItem()), 1, transaction) == 1;;
             boolean hasQuartz = inv.simulateExtract(ItemVariant.of(Items.QUARTZ), 1, transaction) == 1;
-            transaction.close();
+            transaction.commit();
 
             return hasRedstone && hasChargedCertus && hasQuartz;
         }
@@ -150,6 +154,18 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
             if(cachedGrowable.isEmpty() && !hasFluixIngredients()) {
                 isWorking = false;
                 markForUpdate();
+            }
+        }
+        if(!inventory.isEmpty()) {
+            MEStorage gridStorage = getMainNode().getGrid().getStorageService().getInventory();
+            for(ItemStack stack: inventory) {
+                if(stack.equals(ItemStack.EMPTY) || stack.getItem().equals(Items.AIR))
+                    continue;
+                if(!FilteredInventory.canTransfer(stack.getItem())) {
+                    AEItemKey item = AEItemKey.of(stack);
+                    long inserted = gridStorage.insert(item, stack.getCount(), Actionable.MODULATE, new MachineSource(this));
+                    stack.decrement((int) inserted);
+                }
             }
         }
         return hasWork() ? TickRateModulation.URGENT : TickRateModulation.SLEEP;
@@ -235,12 +251,8 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
 
     @Override
     public void onChangeInventory(InternalInventory inv, int slot) {
-        if(inv.getStackInSlot(slot).getItem() instanceof IGrowableCrystal && !cachedGrowable.contains(slot)) {
+        if(inv.getStackInSlot(slot).getItem() instanceof IGrowableCrystal) {
             cachedGrowable.add(slot);
-            isWorking = true;
-        }
-        if(hasFluixIngredients()) {
-            isWorking = true;
         }
         this.markForUpdate();
         getMainNode().ifPresent((grid, node) -> grid.getTickManager().wakeDevice(node));
@@ -263,8 +275,8 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
     }
 
     public class FilteredInventory implements IAEItemFilter {
-        public boolean canTransfer(Item item) {
-            return CrystalGrowthSlot.validItems.contains(item) && (item instanceof CrystalSeedItem);
+        public static boolean canTransfer(Item item) {
+            return CrystalGrowthSlot.validItems.contains(item) || (item instanceof CrystalSeedItem);
         }
 
         @Override
