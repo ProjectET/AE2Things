@@ -25,8 +25,6 @@ import java.util.UUID;
 @Mixin(ScreenHandler.class)
 public abstract class CursedInternalSlotMixin {
 
-    //TODO: Test in AOF modpack
-
     @Final
     @Shadow
     public DefaultedList<Slot> slots;

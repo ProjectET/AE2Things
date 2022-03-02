@@ -51,6 +51,7 @@ public class Command {
     private static int help(CommandContext<ServerCommandSource> context) {
         context.getSource().sendFeedback(new LiteralText("Available Argument(s): "), false);
         context.getSource().sendFeedback(new LiteralText("/ae2things recover <UUID> - Spawns a drive with the given UUID, if it doesn't exist, does not spawn any item."), false);
+        context.getSource().sendFeedback(new LiteralText("/ae2things getuuid - Gets the UUID of the drive in the player's hand if it has a UUID. Returns the DISKS uuid."), false);
         return 0;
     }
 
