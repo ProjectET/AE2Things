@@ -60,12 +60,11 @@ dependencies {
         exclude(group: "net.fabricmc.fabric-api")
     }
 
+    modImplementation("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}")
+
     modCompileOnly("mcp.mobius.waila:wthit-api:fabric-${project.wthit_version}") {
         exclude group: "net.fabricmc.fabric-api"
     }
-
-    modRuntimeOnly("curse.maven:techreborn-233564:3553653")
-    modRuntimeOnly("curse.maven:reborncore-237903:3553654")
 
     // PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
     // You may need to force-disable transitiveness on them.
