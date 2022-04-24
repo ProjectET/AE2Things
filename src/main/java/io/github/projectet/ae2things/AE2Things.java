@@ -3,7 +3,7 @@ package io.github.projectet.ae2things;
 import appeng.api.IAEAddonEntrypoint;
 import appeng.api.storage.StorageCells;
 import appeng.api.upgrades.Upgrades;
-import appeng.block.AEBaseEntityBlock;
+import appeng.block.AEBaseBlockItem;
 import appeng.core.definitions.AEItems;
 import io.github.projectet.ae2things.block.BlockAdvancedInscriber;
 import io.github.projectet.ae2things.block.BlockCrystalGrowth;
@@ -21,7 +21,6 @@ import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityT
 import net.minecraft.block.Block;
 import net.minecraft.block.Material;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -49,7 +48,7 @@ public class AE2Things implements IAEAddonEntrypoint {
 
     private void registerBlockwithItem(String path, Block block) {
         Registry.register(Registry.BLOCK, id(path), block);
-        Registry.register(Registry.ITEM, id(path), new BlockItem(block, new Item.Settings().group(ITEM_GROUP)));
+        Registry.register(Registry.ITEM, id(path), new AEBaseBlockItem(block, new Item.Settings().group(ITEM_GROUP)));
     }
 
     @Override
@@ -61,10 +60,8 @@ public class AE2Things implements IAEAddonEntrypoint {
         StorageCells.addCellGuiHandler(new DISKItemCellGuiHandler());
 
         registerBlockwithItem("advanced_inscriber", ADVANCED_INSCRIBER);
-        ((AEBaseEntityBlock<BEAdvancedInscriber>) ADVANCED_INSCRIBER).setBlockEntity(BEAdvancedInscriber.class, ADVANCED_INSCRIBER_BE, null, null);
 
         registerBlockwithItem("crystal_growth", CRYSTAL_GROWTH);
-        ((AEBaseEntityBlock<BECrystalGrowth>) CRYSTAL_GROWTH).setBlockEntity(BECrystalGrowth.class, CRYSTAL_GROWTH_BE, null, null);
 
         Upgrades.add(AEItems.SPEED_CARD, ADVANCED_INSCRIBER, 5);
         Upgrades.add(AEItems.SPEED_CARD, CRYSTAL_GROWTH, 3);

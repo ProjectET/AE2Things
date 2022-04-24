@@ -28,6 +28,7 @@ public class BlockCrystalGrowth extends AEBaseEntityBlock<BECrystalGrowth> {
         super(settings);
         settings.requiresTool();
         this.setDefaultState(this.getDefaultState().with(WORKING, false));
+        setBlockEntity(BECrystalGrowth.class, AE2Things.CRYSTAL_GROWTH_BE, null, null);
     }
 
     public static final BooleanProperty WORKING = BooleanProperty.of("working");

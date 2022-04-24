@@ -70,7 +70,7 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
 
     @Override
     public TickingRequest getTickingRequest(IGridNode node) {
-        return new TickingRequest(TickRates.Inscriber, !this.hasWork(), true);
+        return new TickingRequest(1, 20, !this.hasWork() && inventory.isEmpty(), true);
     }
 
     public boolean isWorking() {
@@ -82,28 +82,24 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
     }
 
     private boolean hasFluixIngredients() {
-        Storage<ItemVariant> inv = inventory.toStorage();
-        try(Transaction transaction = Transaction.openOuter()) {
-            boolean hasRedstone = inv.simulateExtract(ItemVariant.of(Items.REDSTONE), 1, transaction) == 1;
-            boolean hasChargedCertus = inv.simulateExtract(ItemVariant.of(AEItems.CERTUS_QUARTZ_CRYSTAL_CHARGED.asItem()), 1, transaction) == 1;;
-            boolean hasQuartz = inv.simulateExtract(ItemVariant.of(Items.QUARTZ), 1, transaction) == 1;
-            transaction.commit();
+            boolean hasRedstone = inventory.simulateRemove(1, new ItemStack(Items.REDSTONE), null).getCount() == 1;
+            boolean hasChargedCertus = inventory.simulateRemove(1, new ItemStack(AEItems.CERTUS_QUARTZ_CRYSTAL_CHARGED.asItem()), null).getCount() == 1;
+            boolean hasQuartz = inventory.simulateRemove(1, new ItemStack(Items.QUARTZ), null).getCount() == 1;
 
             return hasRedstone && hasChargedCertus && hasQuartz;
-        }
 
     }
 
     @Override
     public TickRateModulation tickingRequest(IGridNode node, int ticksSinceLastCall) {
-        if(hasWork()) {
+        if (hasWork()) {
             final int speedFactor = 1 + this.upgrades.getInstalledUpgrades(AEItems.SPEED_CARD);
             final IEnergyService[] eg = new IEnergyService[1];
             IEnergySource src = this;
             getMainNode().ifPresent(iGrid -> {
                 eg[0] = iGrid.getEnergyService();
             });
-            if(eg[0] == null) {
+            if (eg[0] == null) {
                 return TickRateModulation.IDLE;
             }
             final int powerConsumption = 10 * speedFactor;
@@ -115,13 +111,13 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
             }
 
             if (powerReq > powerThreshold) {
-                if(!isWorking()) {
+                if (!isWorking()) {
                     isWorking = true;
                     markForUpdate();
                 }
                 src.extractAEPower(powerConsumption, Actionable.MODULATE, PowerMultiplier.CONFIG);
             } else {
-                if(isWorking()) {
+                if (isWorking()) {
                     isWorking = false;
                     this.markForUpdate();
                 }
@@ -130,44 +126,38 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
 
             for (Integer slot : cachedGrowable.stream().toList()) {
                 ItemStack crystal = inventory.getStackInSlot(slot);
-                if(!(crystal.getItem() instanceof IGrowableCrystal)) {
+                if (!(crystal.getItem() instanceof IGrowableCrystal)) {
                     cachedGrowable.remove(slot);
                     continue;
                 }
                 inventory.setItemDirect(slot, triggerGrowth(crystal, 20, speedFactor));
                 this.saveChanges();
             }
-            if(hasFluixIngredients()) {
-                try(Transaction context = Transaction.openOuter()) {
-                    int redstone = inventory.removeItems(1, new ItemStack(Items.REDSTONE), null).getCount();
-                    int chargedCertus = inventory.removeItems(1, new ItemStack(AEItems.CERTUS_QUARTZ_CRYSTAL_CHARGED.asItem()), null).getCount();
-                    int quartz = inventory.removeItems(1, new ItemStack(Items.QUARTZ), null).getCount();
-
-                    inventory.addItems(new ItemStack(AEItems.FLUIX_DUST, 2));
-                    if (redstone == 1 && chargedCertus == 1 && quartz == 1) {
-                        context.commit();
-                        this.saveChanges();
-                    }
-                }
+            if (hasFluixIngredients()) {
+                inventory.removeItems(1, new ItemStack(Items.REDSTONE), null);
+                inventory.removeItems(1, new ItemStack(AEItems.CERTUS_QUARTZ_CRYSTAL_CHARGED.asItem()), null);
+                inventory.removeItems(1, new ItemStack(Items.QUARTZ), null);
+                inventory.addItems(new ItemStack(AEItems.FLUIX_DUST, 2));
+                this.saveChanges();
             }
-            if(cachedGrowable.isEmpty() && !hasFluixIngredients()) {
+            if (cachedGrowable.isEmpty() && !hasFluixIngredients()) {
                 isWorking = false;
                 markForUpdate();
             }
         }
-        if(!inventory.isEmpty()) {
+        if (!inventory.isEmpty()) {
             MEStorage gridStorage = getMainNode().getGrid().getStorageService().getInventory();
-            for(ItemStack stack: inventory) {
-                if(stack.equals(ItemStack.EMPTY) || stack.getItem().equals(Items.AIR))
+            for (ItemStack stack: inventory) {
+                if (stack.equals(ItemStack.EMPTY) || stack.getItem().equals(Items.AIR))
                     continue;
-                if(!FilteredInventory.canTransfer(stack.getItem())) {
+                if (!FilteredInventory.canTransfer(stack.getItem())) {
                     AEItemKey item = AEItemKey.of(stack);
                     long inserted = gridStorage.insert(item, stack.getCount(), Actionable.MODULATE, new MachineSource(this));
                     stack.decrement((int) inserted);
                 }
             }
         }
-        return hasWork() ? TickRateModulation.URGENT : TickRateModulation.SLEEP;
+        return hasWork() ? TickRateModulation.URGENT : !inventory.isEmpty() ? TickRateModulation.SLOWER : TickRateModulation.SLEEP;
     }
 
     @Override

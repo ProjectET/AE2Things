@@ -5,7 +5,6 @@ import appeng.api.stacks.AEKey;
 import appeng.api.stacks.AEKeyType;
 import appeng.api.storage.cells.IBasicCellItem;
 import appeng.api.storage.cells.ICellWorkbenchItem;
-import appeng.items.storage.BasicStorageCell;
 import appeng.me.cells.BasicCellHandler;
 import appeng.util.ConfigInventory;
 import com.google.common.base.Preconditions;

@@ -18,6 +18,7 @@ import appeng.api.upgrades.UpgradeInventories;
 import appeng.blockentity.grid.AENetworkPowerBlockEntity;
 import appeng.blockentity.misc.InscriberRecipes;
 import appeng.core.definitions.AEItems;
+import appeng.core.definitions.ItemDefinition;
 import appeng.core.settings.TickRates;
 import appeng.me.helpers.MachineSource;
 import appeng.recipes.handlers.InscriberProcessType;
@@ -114,19 +115,8 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IG
     }
 
     @Override
-    public void setOrientation(final Direction inForward, final Direction inUp) {
-        setPowerSides(EnumSet.allOf(Direction.class));
-    }
-
-    @Override
     public IUpgradeInventory getUpgrades() {
         return upgrades;
-    }
-
-    @Override
-    public void onReady() {
-        this.getMainNode().setExposedOnSides(EnumSet.allOf(Direction.class));
-        super.onReady();
     }
 
     private void setClientStart(long clientStart) {
@@ -251,7 +241,7 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IG
                         this.sideItemHandler.extractItem(0, 1, false);
                     }
 
-                    if(sideItemHandler.getStackInSlot(1).getItem() != Items.AIR) {
+                    if (sideItemHandler.getStackInSlot(1).getItem() != Items.AIR) {
                         ItemStack outStack = sideItemHandler.getStackInSlot(1);
                         AEKey itemKey = AEItemKey.of(outStack);
                         long inserted = getMainNode().getGrid().getStorageService().getInventory().insert(itemKey, outStack.getCount(), Actionable.MODULATE, new MachineSource(this));
@@ -343,10 +333,26 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IG
             }
 
             if (inv == BEAdvancedInscriber.this.topItemHandler || inv == BEAdvancedInscriber.this.botItemHandler) {
+                ItemStack bot = BEAdvancedInscriber.this.botItemHandler.getStackInSlot(0);
+                ItemStack top = BEAdvancedInscriber.this.topItemHandler.getStackInSlot(0);
+
                 if (AEItems.NAME_PRESS.isSameAs(stack)) {
                     return true;
                 }
-                return InscriberRecipes.isValidOptionalIngredient(getWorld(), stack);
+
+                if (inv == BEAdvancedInscriber.this.topItemHandler) {
+                    if (bot == ItemStack.EMPTY || bot == null) {
+                        return InscriberRecipes.isValidOptionalIngredient(getWorld(), stack);
+                    }
+                    return InscriberRecipes.isValidOptionalIngredientCombination(getWorld(), stack, bot);
+                }
+                else {
+                    if (top == ItemStack.EMPTY || top == null) {
+                        return InscriberRecipes.isValidOptionalIngredient(getWorld(), stack);
+                    }
+                    return InscriberRecipes.isValidOptionalIngredientCombination(getWorld(), stack, top);
+                }
+                //return InscriberRecipes.isValidOptionalIngredient(getWorld(), stack);
             }
             return true;
         }

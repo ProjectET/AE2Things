@@ -32,6 +32,7 @@ public class BlockAdvancedInscriber extends AEBaseEntityBlock<BEAdvancedInscribe
         super(settings);
         settings.requiresTool();
         this.setDefaultState(this.getDefaultState().with(SMASHING, false));
+        setBlockEntity(BEAdvancedInscriber.class, AE2Things.ADVANCED_INSCRIBER_BE, null, null);
     }
 
     public static final BooleanProperty SMASHING = BooleanProperty.of("smashing");
