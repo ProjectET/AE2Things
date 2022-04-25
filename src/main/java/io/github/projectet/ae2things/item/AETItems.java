@@ -30,12 +30,6 @@ public class AETItems {
     public static final Identifier MODEL_DISK_DRIVE_4K = AE2Things.id("model/drive/cells/disk_4k");
     public static final Identifier MODEL_DISK_DRIVE_16K = AE2Things.id("model/drive/cells/disk_16k");
     public static final Identifier MODEL_DISK_DRIVE_64K = AE2Things.id("model/drive/cells/disk_64k");
-    public static final Identifier MODEL_ITEM_CELL_256K = AE2Things.id("model/drive/cells/item_cell_256k");
-    public static final Identifier MODEL_ITEM_CELL_1024K = AE2Things.id("model/drive/cells/item_cell_1024k");
-    public static final Identifier MODEL_ITEM_CELL_4096K = AE2Things.id("model/drive/cells/item_cell_4096k");
-    public static final Identifier MODEL_FLUID_CELL_256K = AE2Things.id("model/drive/cells/fluid_cell_256k");
-    public static final Identifier MODEL_FLUID_CELL_1024K = AE2Things.id("model/drive/cells/fluid_cell_1024k");
-    public static final Identifier MODEL_FLUID_CELL_4096K = AE2Things.id("model/drive/cells/fluid_cell_4096k");
 
     public static final FabricItemSettings DEFAULT_SETTINGS = new FabricItemSettings().group(AE2Things.ITEM_GROUP);
 
@@ -51,13 +45,13 @@ public class AETItems {
     public static final StorageComponentItem CELL_COMPONENT_1024K = item(new StorageComponentItem(DEFAULT_SETTINGS.maxCount(64), 1024),"cell_component_1024k");
     public static final StorageComponentItem CELL_COMPONENT_4096K = item(new StorageComponentItem(DEFAULT_SETTINGS.maxCount(64), 4096),"cell_component_4096k");
 
-    public static final BasicStorageCell ITEM_CELL_256K = registerCell(MODEL_ITEM_CELL_256K, new BasicStorageCell(DEFAULT_SETTINGS.maxCount(1), CELL_COMPONENT_256K, AEItems.ITEM_CELL_HOUSING, 2.5f, 256, 2048,63, AEKeyType.items()), "item_storage_cell_256k");
-    public static final BasicStorageCell ITEM_CELL_1024K = registerCell(MODEL_ITEM_CELL_1024K, new BasicStorageCell(DEFAULT_SETTINGS.maxCount(1), CELL_COMPONENT_1024K, AEItems.ITEM_CELL_HOUSING, 3.0f, 1024, 8192,63, AEKeyType.items()), "item_storage_cell_1024k");
-    public static final BasicStorageCell ITEM_CELL_4096K = registerCell(MODEL_ITEM_CELL_4096K, new BasicStorageCell(DEFAULT_SETTINGS.maxCount(1), CELL_COMPONENT_4096K, AEItems.ITEM_CELL_HOUSING, 3.5f, 4096, 32768,63, AEKeyType.items()), "item_storage_cell_4096k");
+    public static final BasicStorageCell ITEM_CELL_256K = registerCell(new Identifier("ae2:block/drive/cells/64k_item_cell"), new BasicStorageCell(DEFAULT_SETTINGS.maxCount(1), CELL_COMPONENT_256K, AEItems.ITEM_CELL_HOUSING, 2.5f, 256, 2048,63, AEKeyType.items()), "item_storage_cell_256k");
+    public static final BasicStorageCell ITEM_CELL_1024K = registerCell(new Identifier("ae2:block/drive/cells/64k_item_cell"), new BasicStorageCell(DEFAULT_SETTINGS.maxCount(1), CELL_COMPONENT_1024K, AEItems.ITEM_CELL_HOUSING, 3.0f, 1024, 8192,63, AEKeyType.items()), "item_storage_cell_1024k");
+    public static final BasicStorageCell ITEM_CELL_4096K = registerCell(new Identifier("ae2:block/drive/cells/64k_item_cell"), new BasicStorageCell(DEFAULT_SETTINGS.maxCount(1), CELL_COMPONENT_4096K, AEItems.ITEM_CELL_HOUSING, 3.5f, 4096, 32768,63, AEKeyType.items()), "item_storage_cell_4096k");
 
-    public static final BasicStorageCell FLUID_CELL_256K = registerCell(MODEL_FLUID_CELL_256K, new BasicStorageCell(DEFAULT_SETTINGS.maxCount(1), CELL_COMPONENT_256K, AEItems.FLUID_CELL_HOUSING, 2.5f, 256, 2048,5, AEKeyType.fluids()),"fluid_storage_cell_256k");
-    public static final BasicStorageCell FLUID_CELL_1024K = registerCell(MODEL_FLUID_CELL_1024K, new BasicStorageCell(DEFAULT_SETTINGS.maxCount(1), CELL_COMPONENT_1024K, AEItems.FLUID_CELL_HOUSING, 3.0f, 1024, 8192,5, AEKeyType.fluids()),"fluid_storage_cell_1024k");
-    public static final BasicStorageCell FLUID_CELL_4096K = registerCell(MODEL_FLUID_CELL_4096K, new BasicStorageCell(DEFAULT_SETTINGS.maxCount(1), CELL_COMPONENT_4096K, AEItems.FLUID_CELL_HOUSING, 3.5f, 4096, 32768,5, AEKeyType.fluids()),"fluid_storage_cell_4096k");
+    public static final BasicStorageCell FLUID_CELL_256K = registerCell(new Identifier("ae2:block/drive/cells/64k_fluid_cell"), new BasicStorageCell(DEFAULT_SETTINGS.maxCount(1), CELL_COMPONENT_256K, AEItems.FLUID_CELL_HOUSING, 2.5f, 256, 2048,5, AEKeyType.fluids()),"fluid_storage_cell_256k");
+    public static final BasicStorageCell FLUID_CELL_1024K = registerCell(new Identifier("ae2:block/drive/cells/64k_fluid_cell"), new BasicStorageCell(DEFAULT_SETTINGS.maxCount(1), CELL_COMPONENT_1024K, AEItems.FLUID_CELL_HOUSING, 3.0f, 1024, 8192,5, AEKeyType.fluids()),"fluid_storage_cell_1024k");
+    public static final BasicStorageCell FLUID_CELL_4096K = registerCell(new Identifier("ae2:block/drive/cells/64k_fluid_cell"), new BasicStorageCell(DEFAULT_SETTINGS.maxCount(1), CELL_COMPONENT_4096K, AEItems.FLUID_CELL_HOUSING, 3.5f, 4096, 32768,5, AEKeyType.fluids()),"fluid_storage_cell_4096k");
 
     public static final Item PORTABLE_DISK_1K = registerPortableDISK("portable_disk_1k", AEItems.CELL_COMPONENT_1K.asItem());
     public static final Item PORTABLE_DISK_4K = registerPortableDISK("portable_disk_4k", AEItems.CELL_COMPONENT_4K.asItem());
