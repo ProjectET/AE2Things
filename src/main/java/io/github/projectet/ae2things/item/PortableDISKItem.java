@@ -250,10 +250,6 @@ public class PortableDISKItem extends AEBasePoweredItem implements IDISKCellItem
         return 0;
     }
 
-    public record StorageTier(String namePrefix, int bytes, int types, int bytesPerType,
-                              Supplier<Item> componentSupplier) {
-    }
-
     public ScreenHandlerType<?> getMenuType() {
         return menuType;
     }
