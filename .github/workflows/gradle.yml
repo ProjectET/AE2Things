@@ -17,7 +17,7 @@ jobs:
         with:
           java-version: 17
       - name: Build
-        run: chmod +x ./gradlew build
+        run: ./gradlew build
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
