@@ -2,7 +2,9 @@ package io.github.projectet.ae2things.item;
 
 import appeng.api.config.FuzzyMode;
 import appeng.api.stacks.AEKeyType;
+import appeng.api.stacks.KeyCounter;
 import appeng.api.storage.cells.CellState;
+import appeng.api.storage.cells.StorageCell;
 import appeng.api.upgrades.IUpgradeInventory;
 import appeng.api.upgrades.UpgradeInventories;
 import appeng.hooks.AEToolItem;
@@ -11,22 +13,23 @@ import appeng.util.ConfigInventory;
 import appeng.util.InteractionUtil;
 import io.github.projectet.ae2things.AE2Things;
 import io.github.projectet.ae2things.storage.DISKCellHandler;
+import io.github.projectet.ae2things.storage.DISKCellInventory;
 import io.github.projectet.ae2things.storage.IDISKCellItem;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemConvertible;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUsageContext;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -37,10 +40,10 @@ public class DISKDrive extends Item implements IDISKCellItem, AEToolItem {
 
     private final int bytes;
     private final double idleDrain;
-    private final ItemConvertible coreItem;
+    private final ItemLike coreItem;
 
-    public DISKDrive(ItemConvertible coreItem, int kilobytes, double idleDrain) {
-        super(new FabricItemSettings().maxCount(1).group(AE2Things.ITEM_GROUP).fireproof());
+    public DISKDrive(ItemLike coreItem, int kilobytes, double idleDrain) {
+        super(new FabricItemSettings().stacksTo(1).tab(AE2Things.ITEM_GROUP).fireResistant());
         this.bytes = kilobytes * 1000;
         this.coreItem = coreItem;
         this.idleDrain = idleDrain;
@@ -73,7 +76,7 @@ public class DISKDrive extends Item implements IDISKCellItem, AEToolItem {
 
     @Override
     public FuzzyMode getFuzzyMode(final ItemStack is) {
-        final String fz = is.getOrCreateNbt().getString("FuzzyMode");
+        final String fz = is.getOrCreateTag().getString("FuzzyMode");
         if (fz.isEmpty()) {
             return FuzzyMode.IGNORE_ALL;
         }
@@ -86,15 +89,15 @@ public class DISKDrive extends Item implements IDISKCellItem, AEToolItem {
 
     @Override
     public void setFuzzyMode(final ItemStack is, final FuzzyMode fzMode) {
-        is.getOrCreateNbt().putString("FuzzyMode", fzMode.name());
+        is.getOrCreateTag().putString("FuzzyMode", fzMode.name());
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(final World level, final PlayerEntity player, final Hand hand) {
-        this.disassembleDrive(player.getStackInHand(hand), level, player);
+    public InteractionResultHolder<ItemStack> use(final Level level, final Player player, final InteractionHand hand) {
+        this.disassembleDrive(player.getItemInHand(hand), level, player);
 
-        return new TypedActionResult<>(ActionResult.success(level.isClient()),
-                player.getStackInHand(hand));
+        return new InteractionResultHolder<>(InteractionResult.sidedSuccess(level.isClientSide()),
+                player.getItemInHand(hand));
     }
 
     @Nullable
@@ -103,29 +106,29 @@ public class DISKDrive extends Item implements IDISKCellItem, AEToolItem {
         return UpgradeInventories.forItem(is, 2);
     }
 
-    private boolean disassembleDrive(final ItemStack stack, final World level, final PlayerEntity player) {
+    private boolean disassembleDrive(final ItemStack stack, final Level level, final Player player) {
         if (InteractionUtil.isInAlternateUseMode(player)) {
-            if (level.isClient()) {
+            if (level.isClientSide()) {
                 return false;
             }
 
-            final PlayerInventory playerInventory = player.getInventory();
+            final Inventory playerInventory = player.getInventory();
             var inv = getCellInventory(stack, null);
-            if (inv != null && playerInventory.getMainHandStack() == stack) {
+            if (inv != null && playerInventory.getSelected() == stack) {
                 var list = inv.getAvailableStacks();
                 if (list.isEmpty()) {
-                    playerInventory.setStack(playerInventory.selectedSlot, ItemStack.EMPTY);
+                    playerInventory.setItem(playerInventory.selected, ItemStack.EMPTY);
 
                     // drop core
-                    playerInventory.offerOrDrop(new ItemStack(coreItem));
+                    playerInventory.placeItemBackInInventory(new ItemStack(coreItem));
 
                     // drop upgrades
                     for (ItemStack upgrade : this.getUpgrades(stack)) {
-                        playerInventory.offerOrDrop(upgrade);
+                        playerInventory.placeItemBackInInventory(upgrade);
                     }
 
                     // drop empty storage cell case
-                    playerInventory.offerOrDrop(new ItemStack(AETItems.DISK_HOUSING));
+                    playerInventory.placeItemBackInInventory(new ItemStack(AETItems.DISK_HOUSING));
 
                     return true;
                 }
@@ -135,15 +138,15 @@ public class DISKDrive extends Item implements IDISKCellItem, AEToolItem {
     }
 
     @Override
-    public ActionResult onItemUseFirst(ItemStack stack, ItemUsageContext context) {
-        return this.disassembleDrive(stack, context.getWorld(), context.getPlayer())
-                ? ActionResult.success(context.getWorld().isClient())
-                : ActionResult.PASS;
+    public InteractionResult onItemUseFirst(ItemStack stack, UseOnContext context) {
+        return this.disassembleDrive(stack, context.getLevel(), context.getPlayer())
+                ? InteractionResult.sidedSuccess(context.getLevel().isClientSide())
+                : InteractionResult.PASS;
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
-        tooltip.add(new LiteralText("Deep Item Storage disK - Storage for dummies").formatted(Formatting.DARK_GRAY, Formatting.ITALIC));
+    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
+        tooltip.add(new TextComponent("Deep Item Storage disK - Storage for dummies").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
         addCellInformationToTooltip(stack, tooltip);
     }
 

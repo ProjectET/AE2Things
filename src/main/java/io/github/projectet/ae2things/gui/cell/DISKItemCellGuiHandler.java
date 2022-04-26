@@ -8,9 +8,9 @@ import appeng.menu.MenuOpener;
 import appeng.menu.locator.MenuLocators;
 import appeng.menu.me.common.MEStorageMenu;
 import io.github.projectet.ae2things.storage.IDISKCellItem;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class DISKItemCellGuiHandler implements ICellGuiHandler {
     @Override
@@ -20,7 +20,7 @@ public class DISKItemCellGuiHandler implements ICellGuiHandler {
     }
 
     @Override
-    public void openChestGui(PlayerEntity player, IChestOrDrive chest, ICellHandler cellHandler, ItemStack cell) {
+    public void openChestGui(Player player, IChestOrDrive chest, ICellHandler cellHandler, ItemStack cell) {
         MenuOpener.open(MEStorageMenu.TYPE, player,
                 MenuLocators.forBlockEntity(((BlockEntity) chest)));
     }

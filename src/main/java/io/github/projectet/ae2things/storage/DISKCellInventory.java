@@ -25,12 +25,14 @@ import io.github.projectet.ae2things.util.StorageManager;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.text.Text;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.Objects;
 import java.util.UUID;
+
+;
 
 public class DISKCellInventory implements StorageCell {
 
@@ -155,8 +157,8 @@ public class DISKCellInventory implements StorageCell {
         if(storedItemCount == 0) {
             if(hasDiskUUID()) {
                 getStorageInstance().removeDisk(getDiskUUID());
-                i.getNbt().remove(Constants.DISKUUID);
-                i.getNbt().remove(DISKCellInventory.ITEM_COUNT_TAG);
+                i.getTag().remove(Constants.DISKUUID);
+                i.getTag().remove(DISKCellInventory.ITEM_COUNT_TAG);
                 initData();
             }
             return;
@@ -166,7 +168,7 @@ public class DISKCellInventory implements StorageCell {
 
         // add new pretty stuff...
         var amounts = new LongArrayList(storedAmounts.size());
-        var keys = new NbtList();
+        var keys = new ListTag();
 
         for (var entry : this.storedAmounts.object2LongEntrySet()) {
             long amount = entry.getLongValue();
@@ -187,13 +189,13 @@ public class DISKCellInventory implements StorageCell {
         this.storedItems = (short) this.storedAmounts.size();
 
         this.storedItemCount = itemCount;
-        i.getOrCreateNbt().putLong(DISKCellInventory.ITEM_COUNT_TAG, itemCount);
+        i.getOrCreateTag().putLong(DISKCellInventory.ITEM_COUNT_TAG, itemCount);
 
         this.isPersisted = true;
     }
 
     @Override
-    public Text getDescription() {
+    public Component getDescription() {
         return null;
     }
 
@@ -214,19 +216,19 @@ public class DISKCellInventory implements StorageCell {
     }
 
     public boolean hasDiskUUID() {
-        return i.hasNbt() && i.getOrCreateNbt().contains(Constants.DISKUUID);
+        return i.hasTag() && i.getOrCreateTag().contains(Constants.DISKUUID);
     }
 
     public static boolean hasDiskUUID(ItemStack disk) {
         if(disk.getItem() instanceof IDISKCellItem) {
-            return disk.hasNbt() && disk.getOrCreateNbt().contains(Constants.DISKUUID);
+            return disk.hasTag() && disk.getOrCreateTag().contains(Constants.DISKUUID);
         }
         return false;
     }
 
     public UUID getDiskUUID() {
         if(hasDiskUUID())
-            return i.getOrCreateNbt().getUuid(Constants.DISKUUID);
+            return i.getOrCreateTag().getUUID(Constants.DISKUUID);
         else return null;
     }
 
@@ -269,7 +271,7 @@ public class DISKCellInventory implements StorageCell {
     private void loadCellItems() {
         boolean corruptedTag = false;
 
-        if(!i.hasNbt()) {
+        if(!i.hasTag()) {
             return;
         }
 
@@ -349,7 +351,7 @@ public class DISKCellInventory implements StorageCell {
         }
 
         if(!hasDiskUUID()) {
-            i.getOrCreateNbt().putUuid(Constants.DISKUUID, UUID.randomUUID());
+            i.getOrCreateTag().putUUID(Constants.DISKUUID, UUID.randomUUID());
             getStorageInstance().getOrCreateDisk(getDiskUUID());
             loadCellItems();
         }
@@ -407,7 +409,7 @@ public class DISKCellInventory implements StorageCell {
 
     public long getNbtItemCount() {
         if(hasDiskUUID()) {
-            return i.getNbt().getLong(DISKCellInventory.ITEM_COUNT_TAG);
+            return i.getTag().getLong(DISKCellInventory.ITEM_COUNT_TAG);
         }
         return 0;
     }

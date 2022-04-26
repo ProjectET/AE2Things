@@ -8,10 +8,9 @@ import appeng.api.storage.cells.ICellWorkbenchItem;
 import appeng.me.cells.BasicCellHandler;
 import appeng.util.ConfigInventory;
 import com.google.common.base.Preconditions;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
-
 import java.util.List;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 
 public interface IDISKCellItem extends ICellWorkbenchItem {
 
@@ -73,7 +72,7 @@ public interface IDISKCellItem extends ICellWorkbenchItem {
     /**
      * Convenient helper to append useful tooltip information.
      */
-    default void addCellInformationToTooltip(ItemStack is, List<Text> lines) {
+    default void addCellInformationToTooltip(ItemStack is, List<Component> lines) {
         Preconditions.checkArgument(is.getItem() == this);
         DISKCellHandler.INSTANCE.addCellInformationToTooltip(is, lines);
     }

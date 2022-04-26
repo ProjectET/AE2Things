@@ -18,7 +18,6 @@ import appeng.api.upgrades.UpgradeInventories;
 import appeng.blockentity.grid.AENetworkPowerBlockEntity;
 import appeng.blockentity.misc.InscriberRecipes;
 import appeng.core.definitions.AEItems;
-import appeng.core.definitions.ItemDefinition;
 import appeng.core.settings.TickRates;
 import appeng.me.helpers.MachineSource;
 import appeng.recipes.handlers.InscriberProcessType;
@@ -28,15 +27,15 @@ import appeng.util.inv.CombinedInternalInventory;
 import appeng.util.inv.FilteredInternalInventory;
 import appeng.util.inv.filter.IAEItemFilter;
 import io.github.projectet.ae2things.AE2Things;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
@@ -124,7 +123,7 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IG
     }
 
     @Override
-    protected boolean readFromStream(PacketByteBuf data) {
+    protected boolean readFromStream(FriendlyByteBuf data) {
         var c = super.readFromStream(data);
 
         var oldSmash = isSmash();
@@ -136,7 +135,7 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IG
         }
 
         for (int i = 0; i < this.inv.size(); i++) {
-            this.inv.setItemDirect(i, data.readItemStack());
+            this.inv.setItemDirect(i, data.readItem());
         }
         this.cachedTask = null;
 
@@ -144,18 +143,18 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IG
     }
 
     @Override
-    protected void writeToStream(PacketByteBuf data) {
+    protected void writeToStream(FriendlyByteBuf data) {
         super.writeToStream(data);
 
         data.writeBoolean(isSmash());
         for (int i = 0; i < this.inv.size(); i++) {
-            data.writeItemStack(inv.getStackInSlot(i));
+            data.writeItem(inv.getStackInSlot(i));
         }
     }
 
     @Nullable
     @Override
-    public InternalInventory getSubInventory(Identifier id) {
+    public InternalInventory getSubInventory(ResourceLocation id) {
         if (id.equals(ISegmentedInventory.STORAGE)) {
             return this.getInternalInventory();
         } else if (id.equals(ISegmentedInventory.UPGRADES)) {
@@ -171,7 +170,7 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IG
 
     @Nullable
     public InscriberRecipe getTask() {
-        if (this.cachedTask == null && world != null) {
+        if (this.cachedTask == null && level != null) {
             ItemStack input = this.sideItemHandler.getStackInSlot(0);
             ItemStack plateA = this.topItemHandler.getStackInSlot(0);
             ItemStack plateB = this.botItemHandler.getStackInSlot(0);
@@ -179,25 +178,25 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IG
                 return null; // No input to handle
             }
 
-            this.cachedTask = InscriberRecipes.findRecipe(world, input, plateA, plateB, true);
+            this.cachedTask = InscriberRecipes.findRecipe(level, input, plateA, plateB, true);
         }
         return this.cachedTask;
     }
 
     @Override
-    public void writeNbt(NbtCompound data) {
-        super.writeNbt(data);
+    public void saveAdditional(CompoundTag data) {
+        super.saveAdditional(data);
         this.upgrades.writeToNBT(data, "upgrades");
     }
 
     @Override
-    public void loadTag(NbtCompound data) {
+    public void loadTag(CompoundTag data) {
         super.loadTag(data);
         this.upgrades.readFromNBT(data, "upgrades");
     }
 
     @Override
-    public void addAdditionalDrops(World level, BlockPos pos, List<ItemStack> drops) {
+    public void addAdditionalDrops(Level level, BlockPos pos, List<ItemStack> drops) {
         super.addAdditionalDrops(level, pos, drops);
 
         for (var upgrade : upgrades) {
@@ -230,7 +229,7 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IG
             if (this.finalStep == 8) {
                 final InscriberRecipe out = this.getTask();
                 if (out != null) {
-                    final ItemStack outputCopy = out.getOutput().copy();
+                    final ItemStack outputCopy = out.getResultItem().copy();
 
                     if (this.sideItemHandler.insertItem(1, outputCopy, false).isEmpty()) {
                         this.setProcessingTime(0);
@@ -285,7 +284,7 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IG
                 this.setProcessingTime(this.getMaxProcessingTime());
                 final InscriberRecipe out = this.getTask();
                 if (out != null) {
-                    final ItemStack outputCopy = out.getOutput().copy();
+                    final ItemStack outputCopy = out.getResultItem().copy();
                     if (this.sideItemHandler.insertItem(1, outputCopy, true).isEmpty()) {
                         this.setSmash(true);
                         this.finalStep = 0;
@@ -342,15 +341,15 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IG
 
                 if (inv == BEAdvancedInscriber.this.topItemHandler) {
                     if (bot == ItemStack.EMPTY || bot == null) {
-                        return InscriberRecipes.isValidOptionalIngredient(getWorld(), stack);
+                        return InscriberRecipes.isValidOptionalIngredient(getLevel(), stack);
                     }
-                    return InscriberRecipes.isValidOptionalIngredientCombination(getWorld(), stack, bot);
+                    return InscriberRecipes.isValidOptionalIngredientCombination(getLevel(), stack, bot);
                 }
                 else {
                     if (top == ItemStack.EMPTY || top == null) {
-                        return InscriberRecipes.isValidOptionalIngredient(getWorld(), stack);
+                        return InscriberRecipes.isValidOptionalIngredient(getLevel(), stack);
                     }
-                    return InscriberRecipes.isValidOptionalIngredientCombination(getWorld(), stack, top);
+                    return InscriberRecipes.isValidOptionalIngredientCombination(getLevel(), stack, top);
                 }
                 //return InscriberRecipes.isValidOptionalIngredient(getWorld(), stack);
             }

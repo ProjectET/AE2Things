@@ -2,6 +2,6 @@
     "parent": "minecraft:item/generated",
     "textures": {
       "layer0": "ae2things:item/portable_disk_1k",
-      "layer1": "ae2:item/storage_cell_led"
+      "layer1": "ae2:item/portable_cell_led"
     }
 }

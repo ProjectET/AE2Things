@@ -34,37 +34,40 @@ import io.github.projectet.ae2things.storage.DISKCellHandler;
 import io.github.projectet.ae2things.storage.IDISKCellItem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.StackReference;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUsageContext;
-import net.minecraft.recipe.CraftingRecipe;
-import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.text.Text;
-import net.minecraft.util.*;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.Util;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Supplier;
 
 public class PortableDISKItem extends AEBasePoweredItem implements IDISKCellItem, IMenuItem, IUpgradeableItem, AEToolItem {
 
     private final StorageComponentItem item;
     private final AEKeyType keyType = AEKeyType.items();
-    private final ScreenHandlerType<?> menuType = MEStorageMenu.PORTABLE_ITEM_CELL_TYPE;
+    private final MenuType<?> menuType = MEStorageMenu.PORTABLE_ITEM_CELL_TYPE;
 
-    public PortableDISKItem(StorageComponentItem item, Settings props) {
+    public PortableDISKItem(StorageComponentItem item, Properties props) {
         super(AEConfig.instance().getPortableCellBattery(), props);
         this.item = item;
     }
 
-    public Identifier getRecipeId() {
+    public ResourceLocation getRecipeId() {
         return AE2Things.id("tools/" + Objects.requireNonNull(getRegistryName()).getPath());
     }
 
@@ -73,8 +76,8 @@ public class PortableDISKItem extends AEBasePoweredItem implements IDISKCellItem
         return 80d + 80d * getUpgrades(stack).getInstalledUpgrades(AEItems.ENERGY_CARD);
     }
 
-    public boolean openFromInventory(PlayerEntity player, int inventorySlot) {
-        var is = player.getInventory().getStack(inventorySlot);
+    public boolean openFromInventory(Player player, int inventorySlot) {
+        var is = player.getInventory().getItem(inventorySlot);
         if (is.getItem() == this) {
             return MenuOpener.open(menuType, player, MenuLocators.forInventorySlot(inventorySlot));
         } else {
@@ -84,37 +87,37 @@ public class PortableDISKItem extends AEBasePoweredItem implements IDISKCellItem
 
     @Nullable
     @Override
-    public PortableDISKMenuHost getMenuHost(PlayerEntity player, int inventorySlot, ItemStack stack, @Nullable BlockPos pos) {
+    public PortableDISKMenuHost getMenuHost(Player player, int inventorySlot, ItemStack stack, @Nullable BlockPos pos) {
         return new PortableDISKMenuHost(player, inventorySlot, this, stack, (p, sm) -> openFromInventory(p, inventorySlot));
     }
 
     @Override
-    public ActionResult onItemUseFirst(ItemStack stack, ItemUsageContext context) {
-        return context.shouldCancelInteraction()
-                && this.disassembleDrive(stack, context.getWorld(), context.getPlayer())
-                ? ActionResult.success(context.getWorld().isClient())
-                : ActionResult.PASS;
+    public InteractionResult onItemUseFirst(ItemStack stack, UseOnContext context) {
+        return context.isSecondaryUseActive()
+                && this.disassembleDrive(stack, context.getLevel(), context.getPlayer())
+                ? InteractionResult.sidedSuccess(context.getLevel().isClientSide())
+                : InteractionResult.PASS;
     }
 
-    private boolean disassembleDrive(ItemStack stack, World level, PlayerEntity player) {
+    private boolean disassembleDrive(ItemStack stack, Level level, Player player) {
         if (!AEConfig.instance().isPortableCellDisassemblyEnabled()) {
             return false;
         }
 
         // We refund the crafting recipe ingredients (the first one each)
-        var recipe = level.getRecipeManager().get(getRecipeId()).orElse(null);
+        var recipe = level.getRecipeManager().byKey(getRecipeId()).orElse(null);
         if (!(recipe instanceof CraftingRecipe craftingRecipe)) {
             AELog.debug("Cannot disassemble portable cell because it's crafting recipe doesn't exist: %s",
                     getRecipeId());
             return false;
         }
 
-        if (level.isClient()) {
+        if (level.isClientSide()) {
             return true;
         }
 
         var playerInventory = player.getInventory();
-        if (playerInventory.getMainHandStack() != stack) {
+        if (playerInventory.getSelected() != stack) {
             return false;
         }
 
@@ -124,26 +127,26 @@ public class PortableDISKItem extends AEBasePoweredItem implements IDISKCellItem
         }
 
         if (inv.getAvailableStacks().isEmpty()) {
-            playerInventory.setStack(playerInventory.selectedSlot, ItemStack.EMPTY);
+            playerInventory.setItem(playerInventory.selected, ItemStack.EMPTY);
 
             var remainingEnergy = getAECurrentPower(stack);
             for (var ingredient : craftingRecipe.getIngredients()) {
-                var ingredientStack = ingredient.getMatchingStacks()[0].copy();
+                var ingredientStack = ingredient.getItems()[0].copy();
 
                 // Dump remaining energy into whatever can accept it
                 if (remainingEnergy > 0 && ingredientStack.getItem() instanceof AEBaseBlockItemChargeable chargeable) {
                     remainingEnergy = chargeable.injectAEPower(ingredientStack, remainingEnergy, Actionable.MODULATE);
                 }
 
-                playerInventory.offerOrDrop(ingredientStack);
+                playerInventory.placeItemBackInInventory(ingredientStack);
             }
 
             // Drop upgrades
             for (var upgrade : getUpgrades(stack)) {
-                playerInventory.offerOrDrop(upgrade);
+                playerInventory.placeItemBackInInventory(upgrade);
             }
         } else {
-            player.sendSystemMessage(PlayerMessages.OnlyEmptyCellsCanBeDisassembled.text(), Util.NIL_UUID);
+            player.sendMessage(PlayerMessages.OnlyEmptyCellsCanBeDisassembled.text(), Util.NIL_UUID);
         }
 
         return true;
@@ -156,22 +159,22 @@ public class PortableDISKItem extends AEBasePoweredItem implements IDISKCellItem
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void appendTooltip(ItemStack stack, World level, List<Text> lines,
-                              TooltipContext advancedTooltips) {
-        super.appendTooltip(stack, level, lines, advancedTooltips);
+    public void appendHoverText(ItemStack stack, Level level, List<Component> lines,
+                              TooltipFlag advancedTooltips) {
+        super.appendHoverText(stack, level, lines, advancedTooltips);
         addCellInformationToTooltip(stack, lines);
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World level, PlayerEntity player, Hand hand) {
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         if (!InteractionUtil.isInAlternateUseMode(player)
-                || !disassembleDrive(player.getStackInHand(hand), level, player)) {
-            if (!level.isClient()) {
+                || !disassembleDrive(player.getItemInHand(hand), level, player)) {
+            if (!level.isClientSide()) {
                 MenuOpener.open(getMenuType(), player, MenuLocators.forHand(player, hand));
             }
         }
-        return new TypedActionResult<>(ActionResult.success(level.isClient()),
-                player.getStackInHand(hand));
+        return new InteractionResultHolder<>(InteractionResult.sidedSuccess(level.isClientSide()),
+                player.getItemInHand(hand));
     }
 
     @Override
@@ -208,7 +211,7 @@ public class PortableDISKItem extends AEBasePoweredItem implements IDISKCellItem
 
     @Override
     public FuzzyMode getFuzzyMode(ItemStack is) {
-        final String fz = is.getOrCreateNbt().getString("FuzzyMode");
+        final String fz = is.getOrCreateTag().getString("FuzzyMode");
         try {
             return FuzzyMode.valueOf(fz);
         } catch (Throwable t) {
@@ -218,16 +221,16 @@ public class PortableDISKItem extends AEBasePoweredItem implements IDISKCellItem
 
     @Override
     public void setFuzzyMode(ItemStack is, FuzzyMode fzMode) {
-        is.getOrCreateNbt().putString("FuzzyMode", fzMode.name());
+        is.getOrCreateTag().putString("FuzzyMode", fzMode.name());
     }
 
     @Override
-    public boolean allowNbtUpdateAnimation(PlayerEntity player, Hand hand, ItemStack oldStack,
+    public boolean allowNbtUpdateAnimation(Player player, InteractionHand hand, ItemStack oldStack,
                                            ItemStack newStack) {
         return false;
     }
 
-    public long insert(PlayerEntity player, ItemStack itemStack, AEKey what, long amount, Actionable mode) {
+    public long insert(Player player, ItemStack itemStack, AEKey what, long amount, Actionable mode) {
         if (keyType.tryCast(what) == null) {
             return 0;
         }
@@ -250,23 +253,23 @@ public class PortableDISKItem extends AEBasePoweredItem implements IDISKCellItem
         return 0;
     }
 
-    public ScreenHandlerType<?> getMenuType() {
+    public MenuType<?> getMenuType() {
         return menuType;
     }
 
     @Override
-    public boolean onStackClicked(ItemStack stack, Slot slot, ClickType action, PlayerEntity player) {
-        if (action != ClickType.RIGHT || !slot.canTakePartial(player)) {
+    public boolean overrideStackedOnOther(ItemStack stack, Slot slot, ClickAction action, Player player) {
+        if (action != ClickAction.SECONDARY || !slot.allowModification(player)) {
             return false;
         }
 
-        var other = slot.getStack();
+        var other = slot.getItem();
         if (other.isEmpty()) {
             return true;
         }
         AEKey key = AEItemKey.of(other);
         int inserted = (int) insert(player, stack, key, other.getCount(), Actionable.MODULATE);
-        other.decrement(inserted);
+        other.shrink(inserted);
 
         return true;
     }
@@ -276,9 +279,9 @@ public class PortableDISKItem extends AEBasePoweredItem implements IDISKCellItem
      * in hand.
      */
     @Override
-    public boolean onClicked(ItemStack stack, ItemStack other, Slot slot, ClickType action,
-                             PlayerEntity player, StackReference access) {
-        if (action != ClickType.RIGHT || !slot.canTakePartial(player)) {
+    public boolean overrideOtherStackedOnMe(ItemStack stack, ItemStack other, Slot slot, ClickAction action,
+                             Player player, SlotAccess access) {
+        if (action != ClickAction.SECONDARY || !slot.allowModification(player)) {
             return false;
         }
 
@@ -288,7 +291,7 @@ public class PortableDISKItem extends AEBasePoweredItem implements IDISKCellItem
 
         AEKey key = AEItemKey.of(other);
         int inserted = (int) insert(player, stack, key, other.getCount(), Actionable.MODULATE);
-        other.decrement(inserted);
+        other.shrink(inserted);
         return true;
     }
 

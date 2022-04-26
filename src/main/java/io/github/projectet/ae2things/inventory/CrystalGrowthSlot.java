@@ -5,13 +5,12 @@ import appeng.api.inventories.InternalInventory;
 import appeng.core.definitions.AEItems;
 import appeng.items.misc.CrystalSeedItem;
 import appeng.menu.slot.AppEngSlot;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 public class CrystalGrowthSlot extends AppEngSlot {
 
@@ -22,7 +21,7 @@ public class CrystalGrowthSlot extends AppEngSlot {
     }
 
     @Override
-    public boolean canInsert(ItemStack stack) {
+    public boolean mayPlace(ItemStack stack) {
         if (!this.getMenu().isValidForSlot(this, stack))
             return false;
 
@@ -32,7 +31,7 @@ public class CrystalGrowthSlot extends AppEngSlot {
         if (stack.getItem() == Items.AIR)
             return false;
 
-        if (!super.canInsert(stack))
+        if (!super.mayPlace(stack))
             return false;
 
         if(stack.getItem() instanceof IGrowableCrystal)

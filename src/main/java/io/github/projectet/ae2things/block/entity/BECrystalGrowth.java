@@ -18,7 +18,6 @@ import appeng.api.upgrades.IUpgradeableObject;
 import appeng.api.upgrades.UpgradeInventories;
 import appeng.blockentity.grid.AENetworkPowerBlockEntity;
 import appeng.core.definitions.AEItems;
-import appeng.core.settings.TickRates;
 import appeng.items.misc.CrystalSeedItem;
 import appeng.me.helpers.MachineSource;
 import appeng.util.inv.AppEngInternalInventory;
@@ -26,19 +25,16 @@ import appeng.util.inv.FilteredInternalInventory;
 import appeng.util.inv.filter.IAEItemFilter;
 import io.github.projectet.ae2things.AE2Things;
 import io.github.projectet.ae2things.inventory.CrystalGrowthSlot;
-import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
-import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
-import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -153,7 +149,7 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
                 if (!FilteredInventory.canTransfer(stack.getItem())) {
                     AEItemKey item = AEItemKey.of(stack);
                     long inserted = gridStorage.insert(item, stack.getCount(), Actionable.MODULATE, new MachineSource(this));
-                    stack.decrement((int) inserted);
+                    stack.shrink((int) inserted);
                 }
             }
         }
@@ -172,28 +168,28 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
     }
 
     @Override
-    protected boolean readFromStream(PacketByteBuf data) {
+    protected boolean readFromStream(FriendlyByteBuf data) {
         var c = super.readFromStream(data);
 
         for (int i = 0; i < this.inventory.size(); i++) {
-            this.inventory.setItemDirect(i, data.readItemStack());
+            this.inventory.setItemDirect(i, data.readItem());
         }
 
         return c;
     }
 
     @Override
-    protected void writeToStream(PacketByteBuf data) {
+    protected void writeToStream(FriendlyByteBuf data) {
         super.writeToStream(data);
 
         for (int i = 0; i < this.inventory.size(); i++) {
-            data.writeItemStack(inventory.getStackInSlot(i));
+            data.writeItem(inventory.getStackInSlot(i));
         }
     }
 
     @Nullable
     @Override
-    public InternalInventory getSubInventory(Identifier id) {
+    public InternalInventory getSubInventory(ResourceLocation id) {
         if (id.equals(ISegmentedInventory.STORAGE)) {
             return this.getInternalInventory();
         } else if (id.equals(ISegmentedInventory.UPGRADES)) {
@@ -204,15 +200,15 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
     }
 
     @Override
-    public void writeNbt(NbtCompound data) {
-        super.writeNbt(data);
+    public void saveAdditional(CompoundTag data) {
+        super.saveAdditional(data);
         this.upgrades.writeToNBT(data, "upgrades");
         data.putIntArray("cache", this.cachedGrowable.stream().toList());
         data.putBoolean("working", isWorking);
     }
 
     @Override
-    public void loadTag(NbtCompound data) {
+    public void loadTag(CompoundTag data) {
         super.loadTag(data);
         this.upgrades.readFromNBT(data, "upgrades");
         this.cachedGrowable.addAll(Arrays.stream(data.getIntArray("cache")).boxed().toList());
@@ -220,7 +216,7 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
     }
 
     @Override
-    public void addAdditionalDrops(World level, BlockPos pos, List<ItemStack> drops) {
+    public void addAdditionalDrops(Level level, BlockPos pos, List<ItemStack> drops) {
         super.addAdditionalDrops(level, pos, drops);
 
         for (var upgrade : upgrades) {

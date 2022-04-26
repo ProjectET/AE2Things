@@ -10,21 +10,21 @@ import appeng.util.ConfigManager;
 import com.google.common.base.Preconditions;
 import io.github.projectet.ae2things.item.PortableDISKItem;
 import io.github.projectet.ae2things.storage.DISKCellHandler;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ScreenHandler;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.function.BiConsumer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
 
 public class PortableDISKMenuHost extends ItemMenuHost implements IPortableTerminal {
 
-    private final BiConsumer<PlayerEntity, ISubMenu> returnMainMenu;
+    private final BiConsumer<Player, ISubMenu> returnMainMenu;
     private final MEStorage cellStorage;
     private final PortableDISKItem item;
 
-    public PortableDISKMenuHost(PlayerEntity player, @Nullable Integer slot, PortableDISKItem diskItem, ItemStack itemStack, BiConsumer<PlayerEntity, ISubMenu> returnMainMenu) {
+    public PortableDISKMenuHost(Player player, @Nullable Integer slot, PortableDISKItem diskItem, ItemStack itemStack, BiConsumer<Player, ISubMenu> returnMainMenu) {
         super(player, slot, itemStack);
         Preconditions.checkArgument(itemStack.getItem() == diskItem, "Stack doesn't match item");
         this.returnMainMenu = returnMainMenu;
@@ -45,7 +45,7 @@ public class PortableDISKMenuHost extends ItemMenuHost implements IPortableTermi
     }
 
     @Override
-    public boolean onBroadcastChanges(ScreenHandler menu) {
+    public boolean onBroadcastChanges(AbstractContainerMenu menu) {
         return ensureItemStillInSlot() && drainPower();
     }
 
@@ -56,7 +56,7 @@ public class PortableDISKMenuHost extends ItemMenuHost implements IPortableTermi
     }
 
     @Override
-    public void returnToMainMenu(PlayerEntity player, ISubMenu subMenu) {
+    public void returnToMainMenu(Player player, ISubMenu subMenu) {
         returnMainMenu.accept(player, subMenu);
     }
 
@@ -68,14 +68,14 @@ public class PortableDISKMenuHost extends ItemMenuHost implements IPortableTermi
     @Override
     public IConfigManager getConfigManager() {
         var out = new ConfigManager((manager, settingName) -> {
-            manager.writeToNBT(getItemStack().getOrCreateNbt());
+            manager.writeToNBT(getItemStack().getOrCreateTag());
         });
 
         out.registerSetting(Settings.SORT_BY, SortOrder.NAME);
         out.registerSetting(Settings.VIEW_MODE, ViewItems.ALL);
         out.registerSetting(Settings.SORT_DIRECTION, SortDir.ASCENDING);
 
-        out.readFromNBT(getItemStack().getOrCreateNbt().copy());
+        out.readFromNBT(getItemStack().getOrCreateTag().copy());
         return out;
     }
 }
