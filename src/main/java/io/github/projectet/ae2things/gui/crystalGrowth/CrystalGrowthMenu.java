@@ -12,7 +12,7 @@ import net.minecraft.world.World;
 
 public class CrystalGrowthMenu extends UpgradeableMenu<BECrystalGrowth> {
 
-    public static ScreenHandlerType<CrystalGrowthMenu> CRYSTAL_GROWTH_SHT = MenuTypeBuilder.create(CrystalGrowthMenu::new, BECrystalGrowth.class).build("crystal_growth");
+    public static ScreenHandlerType<CrystalGrowthMenu> CRYSTAL_GROWTH_SHT;
 
     private final InternalInventory inventory;
     private final World world;

@@ -4,13 +4,18 @@ import appeng.api.IAEAddonEntrypoint;
 import appeng.api.storage.StorageCells;
 import appeng.api.upgrades.Upgrades;
 import appeng.block.AEBaseBlockItem;
+import appeng.block.AEBaseEntityBlock;
 import appeng.core.definitions.AEItems;
+import appeng.menu.AEBaseMenu;
+import appeng.menu.implementations.MenuTypeBuilder;
 import io.github.projectet.ae2things.block.BlockAdvancedInscriber;
 import io.github.projectet.ae2things.block.BlockCrystalGrowth;
 import io.github.projectet.ae2things.block.entity.BEAdvancedInscriber;
 import io.github.projectet.ae2things.block.entity.BECrystalGrowth;
 import io.github.projectet.ae2things.command.Command;
+import io.github.projectet.ae2things.gui.advancedInscriber.AdvancedInscriberMenu;
 import io.github.projectet.ae2things.gui.cell.DISKItemCellGuiHandler;
+import io.github.projectet.ae2things.gui.crystalGrowth.CrystalGrowthMenu;
 import io.github.projectet.ae2things.item.AETItems;
 import io.github.projectet.ae2things.storage.DISKCellHandler;
 import io.github.projectet.ae2things.util.StorageManager;
@@ -69,5 +74,8 @@ public class AE2Things implements IAEAddonEntrypoint {
         ServerTickEvents.START_WORLD_TICK.register((world -> {
             STORAGE_INSTANCE = StorageManager.getInstance(world.getServer());
         }));
+
+        AdvancedInscriberMenu.ADVANCED_INSCRIBER_SHT = MenuTypeBuilder.create(AdvancedInscriberMenu::new, BEAdvancedInscriber.class).build("advanced_inscriber");
+        CrystalGrowthMenu.CRYSTAL_GROWTH_SHT = MenuTypeBuilder.create(CrystalGrowthMenu::new, BECrystalGrowth.class).build("crystal_growth");
     }
 }
