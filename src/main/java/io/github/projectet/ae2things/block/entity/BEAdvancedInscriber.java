@@ -331,29 +331,38 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IG
                 return false;
             }
 
-            if (inv == BEAdvancedInscriber.this.topItemHandler || inv == BEAdvancedInscriber.this.botItemHandler) {
-                ItemStack bot = BEAdvancedInscriber.this.botItemHandler.getStackInSlot(0);
-                ItemStack top = BEAdvancedInscriber.this.topItemHandler.getStackInSlot(0);
+            ItemStack bot = botItemHandler.getStackInSlot(0);
+            ItemStack middle = sideItemHandler.getStackInSlot(0);
+            ItemStack top = topItemHandler.getStackInSlot(0);
 
-                if (AEItems.NAME_PRESS.isSameAs(stack)) {
-                    return true;
+            if (inv == botItemHandler)
+                bot = stack;
+            if (inv == sideItemHandler)
+                middle = stack;
+            if (inv == topItemHandler)
+                top = stack;
+
+            for (var recipe : InscriberRecipes.getRecipes(getLevel())) {
+                if (!middle.isEmpty() && !recipe.getMiddleInput().test(middle)) {
+                    continue;
                 }
 
-                if (inv == BEAdvancedInscriber.this.topItemHandler) {
-                    if (bot == ItemStack.EMPTY || bot == null) {
-                        return InscriberRecipes.isValidOptionalIngredient(getLevel(), stack);
+                if (bot.isEmpty()) {
+                    if (recipe.getTopOptional().test(top) || recipe.getBottomOptional().test(top)) {
+                        return true;
                     }
-                    return InscriberRecipes.isValidOptionalIngredientCombination(getLevel(), stack, bot);
-                }
-                else {
-                    if (top == ItemStack.EMPTY || top == null) {
-                        return InscriberRecipes.isValidOptionalIngredient(getLevel(), stack);
+                } else if (top.isEmpty()) {
+                    if (recipe.getBottomOptional().test(bot) || recipe.getTopOptional().test(bot)) {
+                        return true;
                     }
-                    return InscriberRecipes.isValidOptionalIngredientCombination(getLevel(), stack, top);
+                } else {
+                    if ((recipe.getTopOptional().test(top) && recipe.getBottomOptional().test(bot))
+                            || (recipe.getBottomOptional().test(top) && recipe.getTopOptional().test(bot))) {
+                        return true;
+                    }
                 }
-                //return InscriberRecipes.isValidOptionalIngredient(getWorld(), stack);
             }
-            return true;
+            return false;
         }
     }
 }
