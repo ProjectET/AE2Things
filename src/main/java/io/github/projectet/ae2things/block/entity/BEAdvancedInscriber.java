@@ -39,7 +39,9 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IGridTickable, IUpgradeableObject {
 
@@ -65,7 +67,11 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IG
     private int processingTime = 0;
     private final int maxProcessingTime = 100;
     private boolean smash;
-    private long clientStart;
+
+    private final Map<InternalInventory, ItemStack> lastStacks = new IdentityHashMap<>(Map.of(
+            topItemHandler, ItemStack.EMPTY,
+            botItemHandler, ItemStack.EMPTY,
+            sideItemHandler, ItemStack.EMPTY));
 
 
     public BEAdvancedInscriber(BlockPos pos, BlockState state) {
@@ -102,7 +108,12 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IG
     @Override
     public void onChangeInventory(InternalInventory inv, int slot) {
         if (slot == 0) {
-            this.setProcessingTime(0);
+            boolean isEmpty = inv.getStackInSlot(0).isEmpty();
+            boolean wasEmpty = lastStacks.get(inv).isEmpty();
+            lastStacks.put(inv, inv.getStackInSlot(0).copy());
+            if (isEmpty != wasEmpty) {
+                this.setProcessingTime(0);
+            }
         }
 
         if (!this.isSmash()) {
@@ -118,10 +129,6 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IG
         return upgrades;
     }
 
-    private void setClientStart(long clientStart) {
-        this.clientStart = clientStart;
-    }
-
     @Override
     protected boolean readFromStream(FriendlyByteBuf data) {
         var c = super.readFromStream(data);
@@ -131,7 +138,6 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IG
 
         if (oldSmash != newSmash && newSmash) {
             setSmash(true);
-            setClientStart(System.currentTimeMillis());
         }
 
         for (int i = 0; i < this.inv.size(); i++) {
@@ -331,29 +337,40 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IG
                 return false;
             }
 
-            if (inv == BEAdvancedInscriber.this.topItemHandler || inv == BEAdvancedInscriber.this.botItemHandler) {
-                ItemStack bot = BEAdvancedInscriber.this.botItemHandler.getStackInSlot(0);
-                ItemStack top = BEAdvancedInscriber.this.topItemHandler.getStackInSlot(0);
+            // only allow if is a proper recipe match
+            ItemStack bot = botItemHandler.getStackInSlot(0);
+            ItemStack middle = sideItemHandler.getStackInSlot(0);
+            ItemStack top = topItemHandler.getStackInSlot(0);
 
-                if (AEItems.NAME_PRESS.isSameAs(stack)) {
+            if (inv == botItemHandler)
+                bot = stack;
+            if (inv == sideItemHandler)
+                middle = stack;
+            if (inv == topItemHandler)
+                top = stack;
+
+            for (var recipe : InscriberRecipes.getRecipes(getLevel())) {
+                if (!middle.isEmpty() && !recipe.getMiddleInput().test(middle)) {
+                    continue;
+                }
+                if(bot.isEmpty() && top.isEmpty())
                     return true;
-                }
-
-                if (inv == BEAdvancedInscriber.this.topItemHandler) {
-                    if (bot == ItemStack.EMPTY || bot == null) {
-                        return InscriberRecipes.isValidOptionalIngredient(getLevel(), stack);
+                else if (bot.isEmpty()) {
+                    if (recipe.getTopOptional().test(top) || recipe.getBottomOptional().test(top)) {
+                        return true;
                     }
-                    return InscriberRecipes.isValidOptionalIngredientCombination(getLevel(), stack, bot);
-                }
-                else {
-                    if (top == ItemStack.EMPTY || top == null) {
-                        return InscriberRecipes.isValidOptionalIngredient(getLevel(), stack);
+                } else if (top.isEmpty()) {
+                    if (recipe.getBottomOptional().test(bot) || recipe.getTopOptional().test(bot)) {
+                        return true;
                     }
-                    return InscriberRecipes.isValidOptionalIngredientCombination(getLevel(), stack, top);
+                } else {
+                    if ((recipe.getTopOptional().test(top) && recipe.getBottomOptional().test(bot))
+                            || (recipe.getBottomOptional().test(top) && recipe.getTopOptional().test(bot))) {
+                        return true;
+                    }
                 }
-                //return InscriberRecipes.isValidOptionalIngredient(getWorld(), stack);
             }
-            return true;
+            return false;
         }
     }
 }
