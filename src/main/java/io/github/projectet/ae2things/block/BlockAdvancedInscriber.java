@@ -1,10 +1,7 @@
 package io.github.projectet.ae2things.block;
 
 import appeng.block.AEBaseEntityBlock;
-import appeng.blockentity.misc.InscriberBlockEntity;
-import appeng.blockentity.misc.VibrationChamberBlockEntity;
 import appeng.menu.MenuOpener;
-import appeng.menu.implementations.InscriberMenu;
 import appeng.menu.locator.MenuLocators;
 import appeng.util.InteractionUtil;
 import io.github.projectet.ae2things.AE2Things;
@@ -29,21 +26,21 @@ public class BlockAdvancedInscriber extends AEBaseEntityBlock<BEAdvancedInscribe
     public BlockAdvancedInscriber(Properties settings) {
         super(settings);
         settings.requiresCorrectToolForDrops();
-        this.registerDefaultState(this.defaultBlockState().setValue(SMASHING, false));
+        this.registerDefaultState(this.defaultBlockState().setValue(WORKING, false));
         setBlockEntity(BEAdvancedInscriber.class, AE2Things.ADVANCED_INSCRIBER_BE, null, null);
     }
 
-    public static final BooleanProperty SMASHING = BooleanProperty.create("smashing");
+    public static final BooleanProperty WORKING = BooleanProperty.create("working");
 
     @Override
     protected BlockState updateBlockStateFromBlockEntity(BlockState currentState, BEAdvancedInscriber be) {
-        return currentState.setValue(SMASHING, be.isSmash());
+        return currentState.setValue(WORKING, be.isWorking());
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
-        builder.add(SMASHING);
+        builder.add(WORKING);
     }
 
     @Nullable

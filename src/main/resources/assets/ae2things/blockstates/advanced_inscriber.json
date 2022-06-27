@@ -1,9 +1,9 @@
 {
   "variants": {
-    "smashing=false": {
+    "working=false": {
       "model": "ae2things:block/advanced_inscriber"
     },
-    "smashing=true": {
+    "working=true": {
       "model": "ae2things:block/advanced_inscriber_on"
     }
   }
