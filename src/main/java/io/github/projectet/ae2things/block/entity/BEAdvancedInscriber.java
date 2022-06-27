@@ -64,7 +64,6 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IG
     private InscriberRecipe cachedTask;
     private int processingTime = 0;
     private final int maxProcessingTime = 100;
-    private boolean smash;
     private boolean working;
 
     private final Map<InternalInventory, ItemStack> lastStacks = new IdentityHashMap<>(Map.of(
@@ -115,7 +114,7 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IG
             }
         }
 
-        if (!this.isSmash()) {
+        if (!this.isWorking()) {
             this.markForUpdate();
         }
 
@@ -132,11 +131,11 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IG
     protected boolean readFromStream(FriendlyByteBuf data) {
         var c = super.readFromStream(data);
 
-        var oldSmash = isSmash();
-        var newSmash = data.readBoolean();
+        var oldWorking = isWorking();
+        var newWorking = data.readBoolean();
 
-        if (oldSmash != newSmash && newSmash) {
-            setSmash(true);
+        if (oldWorking != newWorking && newWorking) {
+            working = true;
         }
 
         for (int i = 0; i < this.inv.size(); i++) {
@@ -151,7 +150,7 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IG
     protected void writeToStream(FriendlyByteBuf data) {
         super.writeToStream(data);
 
-        data.writeBoolean(isSmash());
+        data.writeBoolean(isWorking());
         for (int i = 0; i < this.inv.size(); i++) {
             data.writeItem(inv.getStackInSlot(i));
         }
@@ -167,10 +166,6 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IG
         }
 
         return super.getSubInventory(id);
-    }
-
-    public boolean isSmash() {
-        return smash;
     }
 
     @Nullable
@@ -215,7 +210,7 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IG
         }
 
         this.setProcessingTime(0);
-        return this.isSmash();
+        return false;
     }
 
     public boolean isWorking() {
@@ -241,19 +236,43 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IG
     @Override
     public TickRateModulation tickingRequest(IGridNode node, int ticksSinceLastCall) {
         matchWork();
-        if (this.isSmash()) {
-                final InscriberRecipe out = this.getTask();
-                if (out != null) {
-                    final ItemStack outputCopy = out.getResultItem().copy();
+        getMainNode().ifPresent(grid -> {
+            IEnergyService eg = grid.getEnergyService();
+            IEnergySource src = this;
+            // Base 1, increase by 1 for each card
 
-                    if (this.sideItemHandler.insertItem(1, outputCopy, false).isEmpty()) {
-                        this.setProcessingTime(0);
-                        if (out.getProcessType() == InscriberProcessType.PRESS) {
-                            this.topItemHandler.extractItem(0, 1, false);
-                            this.botItemHandler.extractItem(0, 1, false);
-                        }
-                        this.sideItemHandler.extractItem(0, 1, false);
+            final int speedFactor = 1 + (this.upgrades.getInstalledUpgrades(AEItems.SPEED_CARD) * 2);
+            final int powerConsumption = 10 * speedFactor;
+            final double powerThreshold = powerConsumption - 0.01;
+            double powerReq = this.extractAEPower(powerConsumption, Actionable.SIMULATE, PowerMultiplier.CONFIG);
+            if (powerReq <= powerThreshold) {
+                src = eg;
+                powerReq = eg.extractAEPower(powerConsumption, Actionable.SIMULATE, PowerMultiplier.CONFIG);
+            }
+
+            if (powerReq > powerThreshold) {
+                src.extractAEPower(powerConsumption, Actionable.MODULATE, PowerMultiplier.CONFIG);
+                if (this.getProcessingTime() == 0) {
+                    this.setProcessingTime(this.getProcessingTime() + speedFactor);
+                } else {
+                    this.setProcessingTime(this.getProcessingTime() + ticksSinceLastCall * speedFactor);
+                }
+            }
+        });
+
+        if (this.getProcessingTime() > this.getMaxProcessingTime()) {
+            this.setProcessingTime(this.getMaxProcessingTime());
+            final InscriberRecipe out = this.getTask();
+            if (out != null) {
+                final ItemStack outputCopy = out.getResultItem().copy();
+                if (this.sideItemHandler.insertItem(1, outputCopy, true).isEmpty()) {
+                    this.sideItemHandler.insertItem(1, outputCopy, false);
+                    this.setProcessingTime(0);
+                    if (out.getProcessType() == InscriberProcessType.PRESS) {
+                        this.topItemHandler.extractItem(0, 1, false);
+                        this.botItemHandler.extractItem(0, 1, false);
                     }
+                    this.sideItemHandler.extractItem(0, 1, false);
 
                     if (sideItemHandler.getStackInSlot(1).getItem() != Items.AIR) {
                         ItemStack outStack = sideItemHandler.getStackInSlot(1);
@@ -261,48 +280,7 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IG
                         long inserted = getMainNode().getGrid().getStorageService().getInventory().insert(itemKey, outStack.getCount(), Actionable.MODULATE, new MachineSource(this));
                         sideItemHandler.extractItem(1, (int) inserted, false);
                     }
-
                     this.saveChanges();
-                    this.setSmash(false);
-                    this.markForUpdate();
-                }
-
-        } else {
-            getMainNode().ifPresent(grid -> {
-                IEnergyService eg = grid.getEnergyService();
-                IEnergySource src = this;
-
-                // Base 1, increase by 1 for each card
-                final int speedFactor = 1 + (this.upgrades.getInstalledUpgrades(AEItems.SPEED_CARD) * 2);
-                final int powerConsumption = 10 * speedFactor;
-                final double powerThreshold = powerConsumption - 0.01;
-                double powerReq = this.extractAEPower(powerConsumption, Actionable.SIMULATE, PowerMultiplier.CONFIG);
-
-                if (powerReq <= powerThreshold) {
-                    src = eg;
-                    powerReq = eg.extractAEPower(powerConsumption, Actionable.SIMULATE, PowerMultiplier.CONFIG);
-                }
-
-                if (powerReq > powerThreshold) {
-                    src.extractAEPower(powerConsumption, Actionable.MODULATE, PowerMultiplier.CONFIG);
-
-                    if (this.getProcessingTime() == 0) {
-                        this.setProcessingTime(this.getProcessingTime() + speedFactor);
-                    } else {
-                        this.setProcessingTime(this.getProcessingTime() + ticksSinceLastCall * speedFactor);
-                    }
-                }
-            });
-
-            if (this.getProcessingTime() > this.getMaxProcessingTime()) {
-                this.setProcessingTime(this.getMaxProcessingTime());
-                final InscriberRecipe out = this.getTask();
-                if (out != null) {
-                    final ItemStack outputCopy = out.getResultItem().copy();
-                    if (this.sideItemHandler.insertItem(1, outputCopy, true).isEmpty()) {
-                        this.setSmash(true);
-                        this.markForUpdate();
-                    }
                 }
             }
         }
@@ -318,18 +296,9 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IG
         return this.processingTime;
     }
 
-    public void setSmash(boolean smash) {
-        this.smash = smash;
-    }
-
-
     public class FilteredInventory implements IAEItemFilter {
         @Override
         public boolean allowExtract(InternalInventory inv, int slot, int amount) {
-            if (BEAdvancedInscriber.this.isSmash()) {
-                return false;
-            }
-
             return slot == 1;
         }
 
@@ -337,10 +306,6 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IG
         public boolean allowInsert(InternalInventory inv, int slot, ItemStack stack) {
             // output slot
             if (slot == 1) {
-                return false;
-            }
-
-            if (BEAdvancedInscriber.this.isSmash()) {
                 return false;
             }
 
