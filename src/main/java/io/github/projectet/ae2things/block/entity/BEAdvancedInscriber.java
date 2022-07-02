@@ -242,7 +242,7 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IG
             // Base 1, increase by 1 for each card
 
             final int speedFactor = 1 + (this.upgrades.getInstalledUpgrades(AEItems.SPEED_CARD) * 3);
-            final int powerConsumption = 10 * speedFactor;
+            final int powerConsumption = 20 * speedFactor;
             final double powerThreshold = powerConsumption - 0.01;
             double powerReq = this.extractAEPower(powerConsumption, Actionable.SIMULATE, PowerMultiplier.CONFIG);
             if (powerReq <= powerThreshold) {
