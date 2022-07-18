@@ -4,7 +4,6 @@ import appeng.client.gui.implementations.UpgradeableScreen;
 import appeng.client.gui.style.ScreenStyle;
 import appeng.client.gui.widgets.ProgressBar;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.entity.player.Inventory;
 
 public class AdvancedInscriberRootPanel extends UpgradeableScreen<AdvancedInscriberMenu> {
@@ -22,6 +21,6 @@ public class AdvancedInscriberRootPanel extends UpgradeableScreen<AdvancedInscri
         super.updateBeforeRender();
 
         int progress = this.menu.getCurrentProgress() * 100 / this.menu.getMaxProgress();
-        this.pb.setFullMsg(new TextComponent(progress + "%"));
+        this.pb.setFullMsg(Component.literal(progress + "%"));
     }
 }

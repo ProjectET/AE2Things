@@ -7,6 +7,8 @@ import appeng.block.AEBaseBlockItem;
 import appeng.block.AEBaseEntityBlock;
 import appeng.core.definitions.AEItems;
 import appeng.menu.AEBaseMenu;
+import appeng.menu.SlotSemantic;
+import appeng.menu.SlotSemantics;
 import appeng.menu.implementations.MenuTypeBuilder;
 import io.github.projectet.ae2things.block.BlockAdvancedInscriber;
 import io.github.projectet.ae2things.block.BlockCrystalGrowth;
@@ -39,6 +41,8 @@ public class AE2Things implements IAEAddonEntrypoint {
     public static final CreativeModeTab ITEM_GROUP = FabricItemGroupBuilder.build(id("item_group"), () -> new ItemStack(AETItems.DISK_HOUSING));
 
     public static StorageManager STORAGE_INSTANCE = new StorageManager();
+
+    public static SlotSemantic CG_SEMANTIC = SlotSemantics.register("AE2THINGS_CRYSTAL_GROWTH", false);
 
     public static final Block ADVANCED_INSCRIBER = new BlockAdvancedInscriber(FabricBlockSettings.of(Material.METAL).destroyTime(4f));
     public static BlockEntityType<BEAdvancedInscriber> ADVANCED_INSCRIBER_BE = Registry.register(Registry.BLOCK_ENTITY_TYPE, id("advanced_inscriber_be"), FabricBlockEntityTypeBuilder.create(BEAdvancedInscriber::new, ADVANCED_INSCRIBER).build());

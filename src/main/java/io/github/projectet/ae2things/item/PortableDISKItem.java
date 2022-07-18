@@ -146,7 +146,7 @@ public class PortableDISKItem extends AEBasePoweredItem implements IDISKCellItem
                 playerInventory.placeItemBackInInventory(upgrade);
             }
         } else {
-            player.sendMessage(PlayerMessages.OnlyEmptyCellsCanBeDisassembled.text(), Util.NIL_UUID);
+            player.sendSystemMessage(PlayerMessages.OnlyEmptyCellsCanBeDisassembled.text());
         }
 
         return true;

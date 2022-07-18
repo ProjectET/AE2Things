@@ -2,7 +2,6 @@ package io.github.projectet.ae2things.block.entity;
 
 import appeng.api.config.Actionable;
 import appeng.api.config.PowerMultiplier;
-import appeng.api.implementations.items.IGrowableCrystal;
 import appeng.api.inventories.ISegmentedInventory;
 import appeng.api.inventories.InternalInventory;
 import appeng.api.networking.IGridNode;
@@ -18,9 +17,9 @@ import appeng.api.upgrades.IUpgradeableObject;
 import appeng.api.upgrades.UpgradeInventories;
 import appeng.blockentity.grid.AENetworkPowerBlockEntity;
 import appeng.core.definitions.AEItems;
-import appeng.items.misc.CrystalSeedItem;
 import appeng.me.helpers.MachineSource;
 import appeng.util.inv.AppEngInternalInventory;
+import appeng.util.inv.CombinedInternalInventory;
 import appeng.util.inv.FilteredInternalInventory;
 import appeng.util.inv.filter.IAEItemFilter;
 import io.github.projectet.ae2things.AE2Things;
@@ -40,9 +39,15 @@ import javax.annotation.Nullable;
 import java.util.*;
 
 public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridTickable, IUpgradeableObject {
-
-    private final AppEngInternalInventory inventory = new AppEngInternalInventory(this, 27);
     private final InternalInventory extInventory;
+
+    private final AppEngInternalInventory topRow = new AppEngInternalInventory(this, 4, 64);
+    private final AppEngInternalInventory midRow = new AppEngInternalInventory(this, 4, 64);
+    private final AppEngInternalInventory botRow = new AppEngInternalInventory(this, 4, 64);
+
+    private final CombinedInternalInventory combInv = new CombinedInternalInventory(topRow, midRow, botRow);
+
+    private final Map<AppEngInternalInventory, Integer> progress = new HashMap<>(Map.of(topRow, 0, midRow, 0, botRow, 0));
 
     private IUpgradeInventory upgrades;
 
@@ -55,7 +60,7 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
         upgrades = UpgradeInventories.forMachine(AE2Things.CRYSTAL_GROWTH, 3, this::saveChanges);
 
         var filter = new FilteredInventory();
-        this.extInventory = new FilteredInternalInventory(inventory, filter);
+        this.extInventory = new FilteredInternalInventory(combInv, filter);
 
         this.getMainNode()
                 .setExposedOnSides(EnumSet.allOf(Direction.class))
@@ -66,7 +71,19 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
 
     @Override
     public TickingRequest getTickingRequest(IGridNode node) {
-        return new TickingRequest(1, 20, !this.hasWork() && inventory.isEmpty(), true);
+        return new TickingRequest(1, 20, !this.hasWork() && combInv.isEmpty(), true);
+    }
+
+    public int getTopProg() {
+        return progress.get(topRow);
+    }
+
+    public int getMidProg() {
+        return progress.get(midRow);
+    }
+
+    public int getBotProg() {
+        return progress.get(botRow);
     }
 
     public boolean isWorking() {
@@ -78,12 +95,17 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
     }
 
     private boolean hasFluixIngredients() {
-            boolean hasRedstone = inventory.simulateRemove(1, new ItemStack(Items.REDSTONE), null).getCount() == 1;
-            boolean hasChargedCertus = inventory.simulateRemove(1, new ItemStack(AEItems.CERTUS_QUARTZ_CRYSTAL_CHARGED.asItem()), null).getCount() == 1;
-            boolean hasQuartz = inventory.simulateRemove(1, new ItemStack(Items.QUARTZ), null).getCount() == 1;
+            boolean hasRedstone = combInv.simulateRemove(1, new ItemStack(Items.REDSTONE), null).getCount() == 1;
+            boolean hasChargedCertus = combInv.simulateRemove(1, new ItemStack(AEItems.CERTUS_QUARTZ_CRYSTAL_CHARGED.asItem()), null).getCount() == 1;
+            boolean hasQuartz = combInv.simulateRemove(1, new ItemStack(Items.QUARTZ), null).getCount() == 1;
 
             return hasRedstone && hasChargedCertus && hasQuartz;
 
+    }
+
+    private ItemStack multiplyYield(ItemStack outputStack, int fortuneFactor) {
+        outputStack.setCount(outputStack.getCount() * fortuneFactor);
+        return outputStack;
     }
 
     @Override
@@ -119,7 +141,7 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
                 }
                 return TickRateModulation.IDLE;
             }
-
+            /*
             for (Integer slot : cachedGrowable.stream().toList()) {
                 ItemStack crystal = inventory.getStackInSlot(slot);
                 if (!(crystal.getItem() instanceof IGrowableCrystal)) {
@@ -139,11 +161,11 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
             if (cachedGrowable.isEmpty() && !hasFluixIngredients()) {
                 isWorking = false;
                 markForUpdate();
-            }
+            }*/
         }
-        if (!inventory.isEmpty()) {
+        if (!combInv.isEmpty()) {
             MEStorage gridStorage = getMainNode().getGrid().getStorageService().getInventory();
-            for (ItemStack stack: inventory) {
+            for (ItemStack stack: combInv) {
                 if (stack.equals(ItemStack.EMPTY) || stack.getItem().equals(Items.AIR))
                     continue;
                 if (!FilteredInventory.canTransfer(stack.getItem())) {
@@ -153,7 +175,7 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
                 }
             }
         }
-        return hasWork() ? TickRateModulation.URGENT : !inventory.isEmpty() ? TickRateModulation.SLOWER : TickRateModulation.SLEEP;
+        return hasWork() ? TickRateModulation.URGENT : !combInv.isEmpty() ? TickRateModulation.SLOWER : TickRateModulation.SLEEP;
     }
 
     @Override
@@ -171,8 +193,8 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
     protected boolean readFromStream(FriendlyByteBuf data) {
         var c = super.readFromStream(data);
 
-        for (int i = 0; i < this.inventory.size(); i++) {
-            this.inventory.setItemDirect(i, data.readItem());
+        for (int i = 0; i < this.combInv.size(); i++) {
+            this.combInv.setItemDirect(i, data.readItem());
         }
 
         return c;
@@ -182,8 +204,8 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
     protected void writeToStream(FriendlyByteBuf data) {
         super.writeToStream(data);
 
-        for (int i = 0; i < this.inventory.size(); i++) {
-            data.writeItem(inventory.getStackInSlot(i));
+        for (int i = 0; i < this.combInv.size(); i++) {
+            data.writeItem(combInv.getStackInSlot(i));
         }
     }
 
@@ -226,7 +248,7 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
 
     @Override
     public InternalInventory getInternalInventory() {
-        return inventory;
+        return combInv;
     }
 
     @Override
@@ -236,9 +258,10 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
 
     @Override
     public void onChangeInventory(InternalInventory inv, int slot) {
-        if(inv.getStackInSlot(slot).getItem() instanceof IGrowableCrystal) {
-            cachedGrowable.add(slot);
-        }
+
+        //if(inv.getStackInSlot(slot).getItem() instanceof IGrowableCrystal) {
+        //    cachedGrowable.add(slot);
+        //}
         this.markForUpdate();
         getMainNode().ifPresent((grid, node) -> grid.getTickManager().wakeDevice(node));
     }
@@ -248,30 +271,20 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
         return upgrades;
     }
 
-    public ItemStack triggerGrowth(ItemStack seedItem, int ticks, int multiplier) {
-        if(seedItem.getItem() instanceof CrystalSeedItem crystalSeedItem) {
-            final int growthTicks = CrystalSeedItem.getGrowthTicks(seedItem) + (ticks * multiplier);
-            CrystalSeedItem.setGrowthTicks(seedItem, growthTicks);
-            if(CrystalSeedItem.getGrowthTicks(seedItem) >= CrystalSeedItem.GROWTH_TICKS_REQUIRED) {
-                return crystalSeedItem.triggerGrowth(seedItem);
-            }
-        }
-        return seedItem;
-    }
-
     public class FilteredInventory implements IAEItemFilter {
         public static boolean canTransfer(Item item) {
-            return CrystalGrowthSlot.validItems.contains(item) || (item instanceof CrystalSeedItem);
+            return true;
+            //return CrystalGrowthSlot.validItems.contains(item) || (item instanceof CrystalSeedItem);
         }
 
         @Override
         public boolean allowExtract(InternalInventory inv, int slot, int amount) {
-            return !canTransfer(inv.getStackInSlot(slot).getItem());
+            return slot == 3;
         }
 
         @Override
         public boolean allowInsert(InternalInventory inv, int slot, ItemStack stack) {
-            return canTransfer(stack.getItem());
+            return !(slot == 3);
         }
     }
 }

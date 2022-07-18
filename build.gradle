@@ -43,6 +43,7 @@ repositories {
             includeGroup "curse.maven"
         }
     }
+    maven { url "https://maven.bai.lol" }
 }
 
 dependencies {

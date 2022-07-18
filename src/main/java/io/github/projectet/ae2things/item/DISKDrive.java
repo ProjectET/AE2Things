@@ -13,12 +13,10 @@ import appeng.util.ConfigInventory;
 import appeng.util.InteractionUtil;
 import io.github.projectet.ae2things.AE2Things;
 import io.github.projectet.ae2things.storage.DISKCellHandler;
-import io.github.projectet.ae2things.storage.DISKCellInventory;
 import io.github.projectet.ae2things.storage.IDISKCellItem;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -146,7 +144,7 @@ public class DISKDrive extends Item implements IDISKCellItem, AEToolItem {
 
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
-        tooltip.add(new TextComponent("Deep Item Storage disK - Storage for dummies").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+        tooltip.add(Component.literal("Deep Item Storage disK - Storage for dummies").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
         addCellInformationToTooltip(stack, tooltip);
     }
 
