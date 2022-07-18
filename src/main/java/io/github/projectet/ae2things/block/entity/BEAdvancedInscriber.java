@@ -230,62 +230,65 @@ public class BEAdvancedInscriber extends AENetworkPowerBlockEntity implements IG
 
     @Override
     public TickingRequest getTickingRequest(IGridNode node) {
-        return new TickingRequest(TickRates.Inscriber, !this.hasWork(), false);
+        return new TickingRequest(TickRates.Inscriber, inv.isEmpty() || !this.hasWork(), false);
     }
 
     @Override
     public TickRateModulation tickingRequest(IGridNode node, int ticksSinceLastCall) {
         matchWork();
-        getMainNode().ifPresent(grid -> {
-            IEnergyService eg = grid.getEnergyService();
-            IEnergySource src = this;
-            // Base 1, increase by 1 for each card
+        if(getTask() != null) {
+            getMainNode().ifPresent(grid -> {
+                IEnergyService eg = grid.getEnergyService();
+                IEnergySource src = this;
+                // Base 1, increase by 1 for each card
 
-            final int speedFactor = 1 + (this.upgrades.getInstalledUpgrades(AEItems.SPEED_CARD) * 3);
-            final int powerConsumption = 20 * speedFactor;
-            final double powerThreshold = powerConsumption - 0.01;
-            double powerReq = this.extractAEPower(powerConsumption, Actionable.SIMULATE, PowerMultiplier.CONFIG);
-            if (powerReq <= powerThreshold) {
-                src = eg;
-                powerReq = eg.extractAEPower(powerConsumption, Actionable.SIMULATE, PowerMultiplier.CONFIG);
-            }
-
-            if (powerReq > powerThreshold) {
-                src.extractAEPower(powerConsumption, Actionable.MODULATE, PowerMultiplier.CONFIG);
-                if (this.getProcessingTime() == 0) {
-                    this.setProcessingTime(this.getProcessingTime() + speedFactor);
-                } else {
-                    this.setProcessingTime(this.getProcessingTime() + ticksSinceLastCall * speedFactor);
+                final int speedFactor = 1 + (this.upgrades.getInstalledUpgrades(AEItems.SPEED_CARD) * 3);
+                final int powerConsumption = 20 * speedFactor;
+                final double powerThreshold = powerConsumption - 0.01;
+                double powerReq = this.extractAEPower(powerConsumption, Actionable.SIMULATE, PowerMultiplier.CONFIG);
+                if (powerReq <= powerThreshold) {
+                    src = eg;
+                    powerReq = eg.extractAEPower(powerConsumption, Actionable.SIMULATE, PowerMultiplier.CONFIG);
                 }
-            }
-        });
 
-        if (this.getProcessingTime() > this.getMaxProcessingTime()) {
-            this.setProcessingTime(this.getMaxProcessingTime());
-            final InscriberRecipe out = this.getTask();
-            if (out != null) {
-                final ItemStack outputCopy = out.getResultItem().copy();
-                if (this.sideItemHandler.insertItem(1, outputCopy, true).isEmpty()) {
-                    this.sideItemHandler.insertItem(1, outputCopy, false);
-                    this.setProcessingTime(0);
-                    if (out.getProcessType() == InscriberProcessType.PRESS) {
-                        this.topItemHandler.extractItem(0, 1, false);
-                        this.botItemHandler.extractItem(0, 1, false);
+                if (powerReq > powerThreshold) {
+                    src.extractAEPower(powerConsumption, Actionable.MODULATE, PowerMultiplier.CONFIG);
+                    if (this.getProcessingTime() == 0) {
+                        this.setProcessingTime(this.getProcessingTime() + speedFactor);
+                    } else {
+                        this.setProcessingTime(this.getProcessingTime() + ticksSinceLastCall * speedFactor);
                     }
-                    this.sideItemHandler.extractItem(0, 1, false);
+                }
+            });
 
-                    if (sideItemHandler.getStackInSlot(1).getItem() != Items.AIR) {
-                        ItemStack outStack = sideItemHandler.getStackInSlot(1);
-                        AEKey itemKey = AEItemKey.of(outStack);
-                        long inserted = getMainNode().getGrid().getStorageService().getInventory().insert(itemKey, outStack.getCount(), Actionable.MODULATE, new MachineSource(this));
-                        sideItemHandler.extractItem(1, (int) inserted, false);
+            if (this.getProcessingTime() > this.getMaxProcessingTime()) {
+                this.setProcessingTime(this.getMaxProcessingTime());
+                final InscriberRecipe out = this.getTask();
+                if (out != null) {
+                    final ItemStack outputCopy = out.getResultItem().copy();
+                    if (this.sideItemHandler.insertItem(1, outputCopy, true).isEmpty()) {
+                        this.sideItemHandler.insertItem(1, outputCopy, false);
+                        this.setProcessingTime(0);
+                        if (out.getProcessType() == InscriberProcessType.PRESS) {
+                            this.topItemHandler.extractItem(0, 1, false);
+                            this.botItemHandler.extractItem(0, 1, false);
+                        }
+                        this.sideItemHandler.extractItem(0, 1, false);
                     }
-                    this.saveChanges();
                 }
             }
         }
+
+        if (sideItemHandler.getStackInSlot(1).getItem() != Items.AIR) {
+            ItemStack outStack = sideItemHandler.getStackInSlot(1);
+            AEKey itemKey = AEItemKey.of(outStack);
+            long inserted = getMainNode().getGrid().getStorageService().getInventory().insert(itemKey, outStack.getCount(), Actionable.MODULATE, new MachineSource(this));
+            sideItemHandler.extractItem(1, (int) inserted, false);
+            this.saveChanges();
+        }
+
         matchWork();
-        return this.hasWork() ? TickRateModulation.URGENT : TickRateModulation.SLEEP;
+        return this.hasWork() ? TickRateModulation.URGENT : !this.inv.isEmpty() ? TickRateModulation.SLOWER : TickRateModulation.SLEEP;
     }
 
     public int getMaxProcessingTime() {
