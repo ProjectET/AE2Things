@@ -74,6 +74,7 @@ public class AE2Things implements IAEAddonEntrypoint {
 
         Upgrades.add(AEItems.SPEED_CARD, ADVANCED_INSCRIBER, 5);
         Upgrades.add(AEItems.SPEED_CARD, CRYSTAL_GROWTH, 3);
+        Upgrades.add(AETItems.FORTUNE_CARD, CRYSTAL_GROWTH, 3);
 
         ServerTickEvents.START_WORLD_TICK.register((world -> {
             STORAGE_INSTANCE = StorageManager.getInstance(world.getServer());

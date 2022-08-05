@@ -4,7 +4,9 @@ import io.github.projectet.ae2things.AE2Things;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -13,9 +15,9 @@ import net.minecraft.world.level.Level;
 
 public class CrystalGrowthRecipe implements Recipe<Container> {
 
-    private final ResourceLocation TYPE_ID = AE2Things.id("crystal_growth_chamber");
+    public final static ResourceLocation TYPE_ID = AE2Things.id("crystal_growth_chamber");
 
-    private final RecipeType<CrystalGrowthRecipe> TYPE = RecipeType.register(TYPE_ID.toString());
+    public final static RecipeType<CrystalGrowthRecipe> TYPE = RecipeType.register(TYPE_ID.toString());
 
     private final ResourceLocation id;
 
@@ -53,6 +55,16 @@ public class CrystalGrowthRecipe implements Recipe<Container> {
 
     public Ingredient getDamagedCrystal() {
         return damagedCrystal;
+    }
+
+    public Item nextStage(ItemStack item) {
+        if(isFlawless(item))
+            return Items.AIR;
+        else if(getFlawedCrystal().test(item))
+            return getChippedCrystal().isEmpty() ? Items.AIR : getChippedCrystal().getItems()[0].getItem();
+        else if(getChippedCrystal().test(item))
+            return getDamagedCrystal().isEmpty() ? Items.AIR : getDamagedCrystal().getItems()[0].getItem();
+        return Items.AIR;
     }
 
     @Override

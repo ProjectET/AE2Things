@@ -23,7 +23,8 @@ import appeng.util.inv.CombinedInternalInventory;
 import appeng.util.inv.FilteredInternalInventory;
 import appeng.util.inv.filter.IAEItemFilter;
 import io.github.projectet.ae2things.AE2Things;
-import io.github.projectet.ae2things.inventory.CrystalGrowthSlot;
+import io.github.projectet.ae2things.item.AETItems;
+import io.github.projectet.ae2things.recipe.CrystalGrowthRecipe;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -45,9 +46,12 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
     private final AppEngInternalInventory midRow = new AppEngInternalInventory(this, 4, 64);
     private final AppEngInternalInventory botRow = new AppEngInternalInventory(this, 4, 64);
 
+    private final Random r = new Random();
+
     private final CombinedInternalInventory combInv = new CombinedInternalInventory(topRow, midRow, botRow);
 
-    private final Map<AppEngInternalInventory, Integer> progress = new HashMap<>(Map.of(topRow, 0, midRow, 0, botRow, 0));
+    private final Map<AppEngInternalInventory, Integer> progress = new IdentityHashMap<>(Map.of(topRow, 0, midRow, 0, botRow, 0));
+    private final Map<AppEngInternalInventory, CrystalGrowthRecipe> cachedRecipes = new IdentityHashMap<>(Map.of(topRow, null, midRow, null, botRow, null));
 
     private IUpgradeInventory upgrades;
 
@@ -103,9 +107,17 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
 
     }
 
-    private ItemStack multiplyYield(ItemStack outputStack, int fortuneFactor) {
-        outputStack.setCount(outputStack.getCount() * fortuneFactor);
-        return outputStack;
+    private ItemStack multiplyYield(ItemStack output) {
+        output.setCount(output.getCount() * this.upgrades.getInstalledUpgrades(AETItems.FORTUNE_CARD));
+        return output;
+    }
+
+    private boolean outputIsEmpty() {
+        for (AppEngInternalInventory inv: progress.keySet()) {
+            if(inv.getStackInSlot(3) != ItemStack.EMPTY)
+                return false;
+        }
+        return true;
     }
 
     @Override
@@ -141,6 +153,35 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
                 }
                 return TickRateModulation.IDLE;
             }
+            cachedRecipes.forEach((inventory, recipe) -> {
+                if(recipe != null) {
+                    int d = progress.get(inventory);
+                    if(d >= 100) {
+                        ItemStack resultItem = multiplyYield(recipe.getResultItem());
+                        if(inventory.insertItem(3, resultItem, true).getCount() != 0)
+                            return;
+                        int i = 2;
+                        while(inventory.getStackInSlot(i) == ItemStack.EMPTY && i > 0) {
+                            i--;
+                        }
+                        ItemStack stack = inventory.getStackInSlot(i);
+                        if(stack != ItemStack.EMPTY) {
+                            Item item = recipe.nextStage(stack);
+                            if(r.nextInt(15) == 0) {
+                                inventory.extractItem(i, 1, false);
+                                if(item != Items.AIR && i != 2) {
+                                    inventory.setItemDirect(i + 1, new ItemStack(item));
+                                }
+                            }
+                        }
+                        inventory.insertItem(3, resultItem, false);
+                        progress.put(inventory, 0);
+                    }
+                    else {
+                        progress.put(inventory, d + speedFactor);
+                    }
+                }
+            });
             /*
             for (Integer slot : cachedGrowable.stream().toList()) {
                 ItemStack crystal = inventory.getStackInSlot(slot);
@@ -163,7 +204,7 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
                 markForUpdate();
             }*/
         }
-        if (!combInv.isEmpty()) {
+        if (!outputIsEmpty()) {
             MEStorage gridStorage = getMainNode().getGrid().getStorageService().getInventory();
             for (ItemStack stack: combInv) {
                 if (stack.equals(ItemStack.EMPTY) || stack.getItem().equals(Items.AIR))
