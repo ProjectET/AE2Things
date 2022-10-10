@@ -54,7 +54,7 @@ public class BlockAdvancedInscriber extends AEBaseEntityBlock<BEAdvancedInscribe
                                     final InteractionHand hand,
                                     final @Nullable ItemStack heldItem, final BlockHitResult hit) {
         if (!InteractionUtil.isInAlternateUseMode(p)) {
-            final BEAdvancedInscriber ai = (BEAdvancedInscriber) level.getBlockEntity(pos);
+            final BEAdvancedInscriber ai = this.getBlockEntity(level, pos);
             if (ai != null) {
                 if (!level.isClientSide()) {
                     hit.getDirection();

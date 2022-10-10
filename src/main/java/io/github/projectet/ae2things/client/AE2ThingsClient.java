@@ -15,7 +15,9 @@ import io.github.projectet.ae2things.item.PortableDISKItem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
-import net.fabricmc.fabric.api.client.screenhandler.v1.ScreenRegistry;
+import net.minecraft.client.gui.screens.MenuScreens;
+
+import java.awt.*;
 
 @Environment(EnvType.CLIENT)
 public class AE2ThingsClient implements IAEAddonEntrypoint {
@@ -23,7 +25,7 @@ public class AE2ThingsClient implements IAEAddonEntrypoint {
     @SuppressWarnings("RedundantTypeArguments")
     @Override
     public void onAe2Initialized() {
-        ScreenRegistry.<AdvancedInscriberMenu, AdvancedInscriberRootPanel>register(AdvancedInscriberMenu.ADVANCED_INSCRIBER_SHT, (menu, playerInv, title) -> {
+        MenuScreens.<AdvancedInscriberMenu, AdvancedInscriberRootPanel>register(AdvancedInscriberMenu.ADVANCED_INSCRIBER_SHT, (menu, playerInv, title) -> {
             ScreenStyle style;
             try {
                 style = StyleManager.loadStyleDoc("/screens/advanced_inscriber.json");
@@ -34,7 +36,7 @@ public class AE2ThingsClient implements IAEAddonEntrypoint {
 
             return new AdvancedInscriberRootPanel(menu, playerInv, title, style);
         });
-        ScreenRegistry.<CrystalGrowthMenu, CrystalGrowthRootPanel>register(CrystalGrowthMenu.CRYSTAL_GROWTH_SHT, (menu, playerInv, title) -> {
+        MenuScreens.<CrystalGrowthMenu, CrystalGrowthRootPanel>register(CrystalGrowthMenu.CRYSTAL_GROWTH_SHT, (menu, playerInv, title) -> {
             ScreenStyle style;
             try {
                 style = StyleManager.loadStyleDoc("/screens/crystal_growth.json");

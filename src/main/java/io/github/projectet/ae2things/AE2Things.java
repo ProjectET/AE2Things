@@ -77,5 +77,8 @@ public class AE2Things implements IAEAddonEntrypoint {
 
         AdvancedInscriberMenu.ADVANCED_INSCRIBER_SHT = MenuTypeBuilder.create(AdvancedInscriberMenu::new, BEAdvancedInscriber.class).build("advanced_inscriber");
         CrystalGrowthMenu.CRYSTAL_GROWTH_SHT = MenuTypeBuilder.create(CrystalGrowthMenu::new, BECrystalGrowth.class).build("crystal_growth");
+
+        Registry.register(Registry.MENU, new ResourceLocation("ae2:advanced_inscriber"), AdvancedInscriberMenu.ADVANCED_INSCRIBER_SHT);
+        Registry.register(Registry.MENU, new ResourceLocation("ae2:crystal_growth"), CrystalGrowthMenu.CRYSTAL_GROWTH_SHT);
     }
 }
