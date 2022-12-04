@@ -12,7 +12,7 @@ import appeng.api.storage.cells.CellState;
 import appeng.api.upgrades.IUpgradeInventory;
 import appeng.api.upgrades.IUpgradeableItem;
 import appeng.api.upgrades.UpgradeInventories;
-import appeng.block.AEBaseBlockItemChargeable;
+import appeng.block.networking.EnergyCellBlockItem;
 import appeng.core.AEConfig;
 import appeng.core.AELog;
 import appeng.core.definitions.AEItems;
@@ -134,7 +134,7 @@ public class PortableDISKItem extends AEBasePoweredItem implements IDISKCellItem
                 var ingredientStack = ingredient.getItems()[0].copy();
 
                 // Dump remaining energy into whatever can accept it
-                if (remainingEnergy > 0 && ingredientStack.getItem() instanceof AEBaseBlockItemChargeable chargeable) {
+                if (remainingEnergy > 0 && ingredientStack.getItem() instanceof EnergyCellBlockItem chargeable) {
                     remainingEnergy = chargeable.injectAEPower(ingredientStack, remainingEnergy, Actionable.MODULATE);
                 }
 

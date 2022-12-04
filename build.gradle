@@ -61,7 +61,11 @@ dependencies {
         exclude(group: "net.fabricmc.fabric-api")
     }
 
-    modImplementation("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}")
+    modImplementation("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}") {
+        exclude(group: "dev.architectury")
+    }
+
+    modImplementation("dev.architectury:architectury-fabric:${project.architectury_version}")
 
     modCompileOnly("mcp.mobius.waila:wthit-api:fabric-${project.wthit_version}") {
         exclude group: "net.fabricmc.fabric-api"
