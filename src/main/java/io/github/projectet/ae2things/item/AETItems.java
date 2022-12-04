@@ -8,6 +8,7 @@ import appeng.items.AEBaseItem;
 import appeng.items.materials.StorageComponentItem;
 import appeng.items.materials.UpgradeCardItem;
 import appeng.items.storage.BasicStorageCell;
+import appeng.items.storage.StorageTier;
 import appeng.items.tools.powered.PortableCellItem;
 import appeng.menu.me.common.MEStorageMenu;
 import io.github.projectet.ae2things.AE2Things;
@@ -21,9 +22,9 @@ import java.util.List;
 
 public class AETItems {
 
-    public static final PortableCellItem.StorageTier SIZE_1024K = new PortableCellItem.StorageTier("1024k", 524288, 18, 8192,
+    public static final StorageTier SIZE_1024K = new StorageTier(1,"1024k", 524288, 3.0,
             () -> AETItems.CELL_COMPONENT_1024K);
-    public static final PortableCellItem.StorageTier SIZE_4096K = new PortableCellItem.StorageTier("4096k", 2097152, 9, 32768,
+    public static final StorageTier SIZE_4096K = new StorageTier(2, "4096k", 2097152, 3.5,
             () -> AETItems.CELL_COMPONENT_4096K);
 
     public static final ResourceLocation MODEL_DISK_DRIVE_1K = AE2Things.id("model/drive/cells/disk_1k");
@@ -85,11 +86,11 @@ public class AETItems {
         return item(new PortableDISKItem(sizeComponent, DEFAULT_SETTINGS.stacksTo(1).fireResistant()), id);
     }
 
-    private static Item registerPortableItemCell(String id, PortableCellItem.StorageTier tier) {
+    private static Item registerPortableItemCell(String id, StorageTier tier) {
         return item(new PortableCellItem(AEKeyType.items(), MEStorageMenu.PORTABLE_ITEM_CELL_TYPE, tier, DEFAULT_SETTINGS.stacksTo(1)), id);
     }
 
-    private static Item registerPortableFluidCell(String id, PortableCellItem.StorageTier tier) {
+    private static Item registerPortableFluidCell(String id, StorageTier tier) {
         return item(new PortableCellItem(AEKeyType.fluids(), MEStorageMenu.PORTABLE_FLUID_CELL_TYPE, tier, DEFAULT_SETTINGS.stacksTo(1)), id);
     }
 }

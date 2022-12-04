@@ -9,7 +9,7 @@ import java.util.Collection;
 public class CrystalGrowthRecipes {
 
     public CrystalGrowthRecipe getRecipefromStack(Level level, ItemStack item) {
-        Collection<CrystalGrowthRecipe> values = level.getRecipeManager().byType(CrystalGrowthRecipe.TYPE).values();
+        Collection<CrystalGrowthRecipe> values = level.getRecipeManager().getAllRecipesFor(CrystalGrowthRecipe.TYPE);
         CrystalGrowthRecipe matchedRecipe = null;
         for (CrystalGrowthRecipe recipe : values) {
             for(Ingredient ingredient : recipe.getIngredients()) {
