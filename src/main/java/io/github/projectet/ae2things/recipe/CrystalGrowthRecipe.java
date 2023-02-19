@@ -13,6 +13,8 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 
+import java.util.Collection;
+
 public class CrystalGrowthRecipe implements Recipe<Container> {
 
     public final static ResourceLocation TYPE_ID = AE2Things.id("crystal_growth_chamber");
@@ -35,6 +37,20 @@ public class CrystalGrowthRecipe implements Recipe<Container> {
         this.chippedCrystal = chippedCrystal;
         this.damagedCrystal = damagedCrystal;
         this.outputIngredient = outputIngredient;
+    }
+
+    public static CrystalGrowthRecipe getRecipefromStack(Level level, ItemStack item) {
+        Collection<CrystalGrowthRecipe> values = level.getRecipeManager().getAllRecipesFor(CrystalGrowthRecipe.TYPE);
+        CrystalGrowthRecipe matchedRecipe = null;
+        for (CrystalGrowthRecipe recipe : values) {
+            for(Ingredient ingredient : recipe.getIngredients()) {
+                if(ingredient.test(item))
+                    matchedRecipe = recipe;
+            }
+            if(matchedRecipe != null)
+                break;
+        }
+        return matchedRecipe;
     }
 
     public boolean isFlawless(ItemStack testStack) {

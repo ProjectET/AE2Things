@@ -8,6 +8,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
+import org.jetbrains.annotations.NotNull;
 
 public class CrystalGrowthRecipeSerializer implements RecipeSerializer<CrystalGrowthRecipe> {
 
@@ -16,7 +17,7 @@ public class CrystalGrowthRecipeSerializer implements RecipeSerializer<CrystalGr
     private CrystalGrowthRecipeSerializer() {}
 
     @Override
-    public CrystalGrowthRecipe fromJson(ResourceLocation resourceLocation, JsonObject jsonObject) {
+    public CrystalGrowthRecipe fromJson(@NotNull ResourceLocation resourceLocation, @NotNull JsonObject jsonObject) {
         ItemStack output = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(jsonObject, "result"));
         JsonObject ingredients = GsonHelper.getAsJsonObject(jsonObject, "ingredients");
         Ingredient flawless = Ingredient.fromJson(ingredients.get("flawless"));
@@ -27,7 +28,7 @@ public class CrystalGrowthRecipeSerializer implements RecipeSerializer<CrystalGr
     }
 
     @Override
-    public CrystalGrowthRecipe fromNetwork(ResourceLocation resourceLocation, FriendlyByteBuf friendlyByteBuf) {
+    public CrystalGrowthRecipe fromNetwork(@NotNull ResourceLocation resourceLocation, FriendlyByteBuf friendlyByteBuf) {
         ItemStack output = friendlyByteBuf.readItem();
         Ingredient flawless = Ingredient.fromNetwork(friendlyByteBuf);
         Ingredient flawed = Ingredient.fromNetwork(friendlyByteBuf);

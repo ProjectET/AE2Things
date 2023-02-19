@@ -51,7 +51,7 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
     private final CombinedInternalInventory combInv = new CombinedInternalInventory(topRow, midRow, botRow);
 
     private final Map<AppEngInternalInventory, Integer> progress = new IdentityHashMap<>(Map.of(topRow, 0, midRow, 0, botRow, 0));
-    private final Map<AppEngInternalInventory, CrystalGrowthRecipe> cachedRecipes = new IdentityHashMap<>(Map.of(topRow, null, midRow, null, botRow, null));
+    private final Map<AppEngInternalInventory, CrystalGrowthRecipe> cachedRecipes = new IdentityHashMap<>();
 
     private IUpgradeInventory upgrades;
 

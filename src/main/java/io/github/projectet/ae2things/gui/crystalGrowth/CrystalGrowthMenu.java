@@ -65,8 +65,8 @@ public class CrystalGrowthMenu extends UpgradeableMenu<BECrystalGrowth> {
         world = ip.player.level;
         inventory = crystalGrowth.getInternalInventory();
         int i = 0;
-        for(int x = 0; x < 4; x++) {
-            for(int y = 0; y < 3; y++) {
+        for(int y = 0; y < 3; y++) {
+            for(int x = 0; x < 4; x++) {
                 int xx = 26 + (x * 36);
                 int yy = 17 + (y * 18);
                 CrystalGrowthSlot slot = new CrystalGrowthSlot(inventory, i, xx, yy);
