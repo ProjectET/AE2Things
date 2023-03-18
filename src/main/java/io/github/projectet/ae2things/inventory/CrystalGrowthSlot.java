@@ -3,20 +3,12 @@ package io.github.projectet.ae2things.inventory;
 import appeng.api.inventories.InternalInventory;
 
 import appeng.api.stacks.GenericStack;
-import appeng.client.gui.Icon;
-import appeng.core.AELog;
 import appeng.menu.AEBaseMenu;
-import appeng.menu.slot.AppEngSlot;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-
-import javax.annotation.Nullable;
-import java.util.List;
-import java.util.function.Function;
 
 public class CrystalGrowthSlot extends Slot {
 

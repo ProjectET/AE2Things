@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "ae2things:block/advanced_inscriber/top",
+    "side": "ae2things:block/advanced_inscriber/side_off"
+  }
+}

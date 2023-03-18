@@ -67,9 +67,9 @@ dependencies {
 
     modImplementation("dev.architectury:architectury-fabric:${project.architectury_version}")
 
-    modCompileOnly("mcp.mobius.waila:wthit-api:fabric-${project.wthit_version}") {
-        exclude group: "net.fabricmc.fabric-api"
-    }
+    // modCompileOnly("mcp.mobius.waila:wthit-api:fabric-${project.wthit_version}") {
+    //     exclude group: "net.fabricmc.fabric-api"
+    // }
 
     // PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
     // You may need to force-disable transitiveness on them.

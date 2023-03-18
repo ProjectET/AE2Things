@@ -1,7 +1,6 @@
 package io.github.projectet.ae2things.gui.crystalGrowth;
 
 import appeng.api.inventories.InternalInventory;
-import appeng.menu.SlotSemantics;
 import appeng.menu.implementations.UpgradeableMenu;
 import appeng.menu.interfaces.IProgressProvider;
 import io.github.projectet.ae2things.AE2Things;

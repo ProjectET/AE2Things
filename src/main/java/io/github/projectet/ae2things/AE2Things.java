@@ -4,9 +4,7 @@ import appeng.api.IAEAddonEntrypoint;
 import appeng.api.storage.StorageCells;
 import appeng.api.upgrades.Upgrades;
 import appeng.block.AEBaseBlockItem;
-import appeng.block.AEBaseEntityBlock;
 import appeng.core.definitions.AEItems;
-import appeng.menu.AEBaseMenu;
 import appeng.menu.SlotSemantic;
 import appeng.menu.SlotSemantics;
 import appeng.menu.implementations.MenuTypeBuilder;
@@ -47,7 +45,7 @@ public class AE2Things implements IAEAddonEntrypoint {
     public static final Block ADVANCED_INSCRIBER = new BlockAdvancedInscriber(FabricBlockSettings.of(Material.METAL).destroyTime(4f));
     public static BlockEntityType<BEAdvancedInscriber> ADVANCED_INSCRIBER_BE = Registry.register(Registry.BLOCK_ENTITY_TYPE, id("advanced_inscriber_be"), FabricBlockEntityTypeBuilder.create(BEAdvancedInscriber::new, ADVANCED_INSCRIBER).build());
 
-
+    // Crystal Growth Chamber doesn't work
     public static final Block CRYSTAL_GROWTH = new BlockCrystalGrowth(FabricBlockSettings.of(Material.METAL).destroyTime(4f));
     public static BlockEntityType<BECrystalGrowth> CRYSTAL_GROWTH_BE = Registry.register(Registry.BLOCK_ENTITY_TYPE, id("crystal_growth_be"), FabricBlockEntityTypeBuilder.create(BECrystalGrowth::new, CRYSTAL_GROWTH).build());
 
@@ -82,5 +80,8 @@ public class AE2Things implements IAEAddonEntrypoint {
 
         AdvancedInscriberMenu.ADVANCED_INSCRIBER_SHT = MenuTypeBuilder.create(AdvancedInscriberMenu::new, BEAdvancedInscriber.class).build("advanced_inscriber");
         CrystalGrowthMenu.CRYSTAL_GROWTH_SHT = MenuTypeBuilder.create(CrystalGrowthMenu::new, BECrystalGrowth.class).build("crystal_growth");
+
+        Registry.register(Registry.MENU, new ResourceLocation(MOD_ID, "advanced_inscriber"), AdvancedInscriberMenu.ADVANCED_INSCRIBER_SHT);
+        Registry.register(Registry.MENU, new ResourceLocation(MOD_ID, "crystal_growth"), CrystalGrowthMenu.CRYSTAL_GROWTH_SHT);
     }
 }

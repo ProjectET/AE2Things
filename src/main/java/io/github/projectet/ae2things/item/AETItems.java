@@ -2,9 +2,7 @@ package io.github.projectet.ae2things.item;
 
 import appeng.api.client.StorageCellModels;
 import appeng.api.stacks.AEKeyType;
-import appeng.api.upgrades.Upgrades;
 import appeng.core.definitions.AEItems;
-import appeng.items.AEBaseItem;
 import appeng.items.materials.StorageComponentItem;
 import appeng.items.materials.UpgradeCardItem;
 import appeng.items.storage.BasicStorageCell;

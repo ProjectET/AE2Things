@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "working=false": {
+      "model": "ae2things:block/crystal_growth"
+    },
+    "working=true": {
+      "model": "ae2things:block/crystal_growth_on"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "ae2things",
+  "version": "${version}",
+  "name": "AE2Things",
+  "description": "Adds Crystal growth chamber, advanced inscriber and the DISK",
+  "authors": [
+    "ProjectET"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/ae2things/icon.png",
+  "environment": "*",
+  "mixins": [
+    "ae2things.mixins.json"
+  ],
+  "entrypoints": {
+    "ae2": [
+      "io.github.projectet.ae2things.AE2Things"
+    ],
+    "ae2:client": [
+      "io.github.projectet.ae2things.client.AE2ThingsClient"
+    ],
+    "rei_plugins": [
+      "io.github.projectet.ae2things.compat.REI"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.12.12",
+    "fabric": "*",
+    "ae2": ">=12.0.0",
+    "minecraft": "1.19.*"
+  }
+}

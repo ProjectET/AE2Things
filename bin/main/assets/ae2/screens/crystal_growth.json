@@ -1,0 +1,39 @@
+{
+  "$schema": "schema.json",
+  "includes": ["common/common.json", "common/player_inventory.json"],
+  "background": {
+    "texture": "guis/crystal_growth.png",
+    "srcRect": [0, 0, 176, 166]
+  },
+  "text": {
+    "dialog_title": {
+      "text": {
+        "translate": "gui.ae2things.crystal_growth"
+      },
+      "position": {
+        "left": 8,
+        "top": 6
+      }
+    }
+  },
+  "images": {
+    "progressBar": {
+      "texture": "guis/crystal_growth.png",
+      "srcRect": [178, 2, 6, 18]
+    }
+  },
+  "widgets": {
+    "pb1": {
+      "left": 152,
+      "top": 16
+    },
+    "pb2": {
+      "left": 152,
+      "top": 34
+    },
+    "pb3": {
+      "left": 152,
+      "top": 52
+    }
+  }
+}

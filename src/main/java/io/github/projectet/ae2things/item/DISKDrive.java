@@ -2,9 +2,7 @@ package io.github.projectet.ae2things.item;
 
 import appeng.api.config.FuzzyMode;
 import appeng.api.stacks.AEKeyType;
-import appeng.api.stacks.KeyCounter;
 import appeng.api.storage.cells.CellState;
-import appeng.api.storage.cells.StorageCell;
 import appeng.api.upgrades.IUpgradeInventory;
 import appeng.api.upgrades.UpgradeInventories;
 import appeng.hooks.AEToolItem;
