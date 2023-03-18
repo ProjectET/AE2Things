@@ -1,2 +1,0 @@
-accessWidener	v1	named
-accessible	method	net/minecraft/world/item/crafting/RecipeManager	byType	(Lnet/minecraft/world/item/crafting/RecipeType;)Ljava/util/Map;
