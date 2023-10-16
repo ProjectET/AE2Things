@@ -51,7 +51,7 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
     private final CombinedInternalInventory combInv = new CombinedInternalInventory(topRow, midRow, botRow);
 
     private final Map<AppEngInternalInventory, Integer> progress = new IdentityHashMap<>(Map.of(topRow, 0, midRow, 0, botRow, 0));
-    private final Map<AppEngInternalInventory, CrystalGrowthRecipe> cachedRecipes = new IdentityHashMap<>();
+    private final Map<AppEngInternalInventory, CrystalGrowthRecipe> cachedRecipes = new WeakHashMap<>();
 
     private IUpgradeInventory upgrades;
 
@@ -62,7 +62,6 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
     public BECrystalGrowth(BlockPos pos, BlockState state) {
         super(AE2Things.CRYSTAL_GROWTH_BE, pos, state);
         upgrades = UpgradeInventories.forMachine(AE2Things.CRYSTAL_GROWTH, 3, this::saveChanges);
-
         var filter = new FilteredInventory();
         this.extInventory = new FilteredInternalInventory(combInv, filter);
 
@@ -325,7 +324,7 @@ public class BECrystalGrowth extends AENetworkPowerBlockEntity implements IGridT
 
         @Override
         public boolean allowInsert(InternalInventory inv, int slot, ItemStack stack) {
-            return !(slot == 3);
+            return !(slot == 3) && CrystalGrowthRecipe.getRecipefromStack(getLevel(), stack) != null;
         }
     }
 }

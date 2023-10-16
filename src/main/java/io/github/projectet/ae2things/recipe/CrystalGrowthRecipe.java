@@ -39,10 +39,13 @@ public class CrystalGrowthRecipe implements Recipe<Container> {
         this.outputIngredient = outputIngredient;
     }
 
+    public static Iterable<CrystalGrowthRecipe> getRecipes(Level level) {
+        return level.getRecipeManager().getAllRecipesFor(CrystalGrowthRecipe.TYPE);
+    }
+
     public static CrystalGrowthRecipe getRecipefromStack(Level level, ItemStack item) {
-        Collection<CrystalGrowthRecipe> values = level.getRecipeManager().getAllRecipesFor(CrystalGrowthRecipe.TYPE);
         CrystalGrowthRecipe matchedRecipe = null;
-        for (CrystalGrowthRecipe recipe : values) {
+        for (CrystalGrowthRecipe recipe : getRecipes(level)) {
             for(Ingredient ingredient : recipe.getIngredients()) {
                 if(ingredient.test(item))
                     matchedRecipe = recipe;
