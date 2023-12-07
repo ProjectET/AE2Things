@@ -7,7 +7,6 @@ import appeng.util.InteractionUtil;
 import io.github.projectet.ae2things.AE2Things;
 import io.github.projectet.ae2things.block.entity.BEAdvancedInscriber;
 import io.github.projectet.ae2things.gui.advancedInscriber.AdvancedInscriberMenu;
-import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -20,6 +19,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
+import org.jetbrains.annotations.Nullable;
 
 public class BlockAdvancedInscriber extends AEBaseEntityBlock<BEAdvancedInscriber> {
 
@@ -51,8 +51,8 @@ public class BlockAdvancedInscriber extends AEBaseEntityBlock<BEAdvancedInscribe
 
     @Override
     public InteractionResult onActivated(final Level level, final BlockPos pos, final Player p,
-                                    final InteractionHand hand,
-                                    final @Nullable ItemStack heldItem, final BlockHitResult hit) {
+                                         final InteractionHand hand,
+                                         final @Nullable ItemStack heldItem, final BlockHitResult hit) {
         if (!InteractionUtil.isInAlternateUseMode(p)) {
             final BEAdvancedInscriber ai = (BEAdvancedInscriber) level.getBlockEntity(pos);
             if (ai != null) {

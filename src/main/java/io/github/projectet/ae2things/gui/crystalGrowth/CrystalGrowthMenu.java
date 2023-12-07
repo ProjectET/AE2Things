@@ -2,6 +2,7 @@ package io.github.projectet.ae2things.gui.crystalGrowth;
 
 import appeng.api.inventories.InternalInventory;
 import appeng.menu.SlotSemantics;
+import appeng.menu.implementations.MenuTypeBuilder;
 import appeng.menu.implementations.UpgradeableMenu;
 import appeng.menu.interfaces.IProgressProvider;
 import io.github.projectet.ae2things.AE2Things;
@@ -13,7 +14,7 @@ import net.minecraft.world.level.Level;
 
 public class CrystalGrowthMenu extends UpgradeableMenu<BECrystalGrowth> {
 
-    public static MenuType<CrystalGrowthMenu> CRYSTAL_GROWTH_SHT;
+    public static MenuType<CrystalGrowthMenu> CRYSTAL_GROWTH_SHT = MenuTypeBuilder.create(CrystalGrowthMenu::new, BECrystalGrowth.class).build("crystal_growth");;
 
     private final InternalInventory inventory;
     private final Level world;

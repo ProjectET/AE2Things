@@ -7,7 +7,6 @@ import appeng.util.InteractionUtil;
 import io.github.projectet.ae2things.AE2Things;
 import io.github.projectet.ae2things.block.entity.BECrystalGrowth;
 import io.github.projectet.ae2things.gui.crystalGrowth.CrystalGrowthMenu;
-import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -20,6 +19,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
+import org.jetbrains.annotations.Nullable;
 
 public class BlockCrystalGrowth extends AEBaseEntityBlock<BECrystalGrowth> {
 

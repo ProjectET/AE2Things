@@ -5,6 +5,7 @@ import appeng.api.storage.StorageCells;
 import appeng.api.upgrades.Upgrades;
 import appeng.block.AEBaseBlockItem;
 import appeng.block.AEBaseEntityBlock;
+import appeng.core.AppEng;
 import appeng.core.definitions.AEItems;
 import appeng.menu.AEBaseMenu;
 import appeng.menu.SlotSemantic;
@@ -80,7 +81,7 @@ public class AE2Things implements IAEAddonEntrypoint {
             STORAGE_INSTANCE = StorageManager.getInstance(world.getServer());
         }));
 
-        AdvancedInscriberMenu.ADVANCED_INSCRIBER_SHT = MenuTypeBuilder.create(AdvancedInscriberMenu::new, BEAdvancedInscriber.class).build("advanced_inscriber");
-        CrystalGrowthMenu.CRYSTAL_GROWTH_SHT = MenuTypeBuilder.create(CrystalGrowthMenu::new, BECrystalGrowth.class).build("crystal_growth");
+        Registry.register(Registry.MENU, AppEng.makeId("advanced_inscriber"),AdvancedInscriberMenu.ADVANCED_INSCRIBER_SHT);
+        Registry.register(Registry.MENU, AppEng.makeId("crystal_growth"),CrystalGrowthMenu.CRYSTAL_GROWTH_SHT);
     }
 }

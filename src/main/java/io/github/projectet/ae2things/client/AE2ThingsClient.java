@@ -47,8 +47,6 @@ public class AE2ThingsClient implements IAEAddonEntrypoint {
         });
 
         ColorProviderRegistry.ITEM.register(DISKDrive::getColor, AETItems.DISK_DRIVE_1K, AETItems.DISK_DRIVE_4K, AETItems.DISK_DRIVE_16K, AETItems.DISK_DRIVE_64K);
-        ColorProviderRegistry.ITEM.register(BasicStorageCell::getColor, AETItems.FLUID_CELL_1024K, AETItems.FLUID_CELL_4096K, AETItems.ITEM_CELL_1024K, AETItems.ITEM_CELL_4096K);
         ColorProviderRegistry.ITEM.register(PortableDISKItem::getColor, AETItems.PORTABLE_DISK_1K, AETItems.PORTABLE_DISK_4K, AETItems.PORTABLE_DISK_16K, AETItems.PORTABLE_DISK_64K);
-        ColorProviderRegistry.ITEM.register(PortableCellItem::getColor, AETItems.PORTABLE_ITEM_1024K, AETItems.PORTABLE_ITEM_4096K, AETItems.PORTABLE_FLUID_1024K, AETItems.PORTABLE_FLUID_4096K);
     }
 }

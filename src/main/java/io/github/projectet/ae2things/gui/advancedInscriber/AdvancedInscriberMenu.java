@@ -22,7 +22,7 @@ import net.minecraft.world.level.Level;
 
 public class AdvancedInscriberMenu extends UpgradeableMenu<BEAdvancedInscriber> implements IProgressProvider, IUpgradeableObject {
 
-    public static MenuType<AdvancedInscriberMenu> ADVANCED_INSCRIBER_SHT;
+    public static MenuType<AdvancedInscriberMenu> ADVANCED_INSCRIBER_SHT = MenuTypeBuilder.create(AdvancedInscriberMenu::new, BEAdvancedInscriber.class).build("advanced_inscriber");
 
     private InternalInventory inventory;
     private Level world;
