@@ -1,18 +1,20 @@
 {
-  "type": "ae2:inscriber",
+  "type": "ae2things:crystal_growth_chamber",
   "ingredients": {
-    "bottom": {
-      "item": "ae2:printed_silicon"
+    "flawless": {
+      "item": "ae2:flawless_budding_quartz"
     },
-    "middle": {
-      "item": "minecraft:redstone"
+    "flawed": {
+      "item": "ae2:flawed_budding_quartz"
     },
-    "top": {
-      "item": "ae2:printed_calculation_processor"
+    "chipped": {
+      "item": "ae2:chipped_budding_quartz"
+    },
+    "damaged": {
+      "item": "ae2:damaged_budding_quartz"
     }
   },
-  "mode": "press",
   "result": {
-    "item": "ae2:calculation_processor"
+    "item": "ae2:certus_quartz_crystal"
   }
 }

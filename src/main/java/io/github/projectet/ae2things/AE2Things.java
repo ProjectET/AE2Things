@@ -20,6 +20,8 @@ import io.github.projectet.ae2things.gui.advancedInscriber.AdvancedInscriberMenu
 import io.github.projectet.ae2things.gui.cell.DISKItemCellGuiHandler;
 import io.github.projectet.ae2things.gui.crystalGrowth.CrystalGrowthMenu;
 import io.github.projectet.ae2things.item.AETItems;
+import io.github.projectet.ae2things.recipe.CrystalGrowthRecipe;
+import io.github.projectet.ae2things.recipe.CrystalGrowthRecipeSerializer;
 import io.github.projectet.ae2things.storage.DISKCellHandler;
 import io.github.projectet.ae2things.util.StorageManager;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
@@ -77,11 +79,12 @@ public class AE2Things implements IAEAddonEntrypoint {
         Upgrades.add(AEItems.SPEED_CARD, CRYSTAL_GROWTH, 3);
         Upgrades.add(AETItems.FORTUNE_CARD, CRYSTAL_GROWTH, 3);
 
-        ServerTickEvents.START_WORLD_TICK.register((world -> {
-            STORAGE_INSTANCE = StorageManager.getInstance(world.getServer());
-        }));
+        ServerTickEvents.START_WORLD_TICK.register((world ->
+            STORAGE_INSTANCE = StorageManager.getInstance(world.getServer())));
 
         Registry.register(Registry.MENU, AppEng.makeId("advanced_inscriber"),AdvancedInscriberMenu.ADVANCED_INSCRIBER_SHT);
         Registry.register(Registry.MENU, AppEng.makeId("crystal_growth"),CrystalGrowthMenu.CRYSTAL_GROWTH_SHT);
+
+        Registry.register(Registry.RECIPE_SERIALIZER, CrystalGrowthRecipe.TYPE_ID, CrystalGrowthRecipeSerializer.INSTANCE);
     }
 }

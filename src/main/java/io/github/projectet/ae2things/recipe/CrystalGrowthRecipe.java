@@ -47,8 +47,10 @@ public class CrystalGrowthRecipe implements Recipe<Container> {
         CrystalGrowthRecipe matchedRecipe = null;
         for (CrystalGrowthRecipe recipe : getRecipes(level)) {
             for(Ingredient ingredient : recipe.getIngredients()) {
-                if(ingredient.test(item))
+                if(ingredient.test(item)) {
                     matchedRecipe = recipe;
+                    break;
+                }
             }
             if(matchedRecipe != null)
                 break;
@@ -108,7 +110,12 @@ public class CrystalGrowthRecipe implements Recipe<Container> {
 
     @Override
     public NonNullList<Ingredient> getIngredients() {
-        return NonNullList.of(flawlessCrystal, flawedCrystal, chippedCrystal, damagedCrystal);
+        NonNullList<Ingredient> ingredients = NonNullList.create();
+        ingredients.add(this.flawlessCrystal);
+        ingredients.add(this.flawedCrystal);
+        ingredients.add(this.chippedCrystal);
+        ingredients.add(this.damagedCrystal);
+        return ingredients;
     }
 
     @Override
@@ -124,5 +131,10 @@ public class CrystalGrowthRecipe implements Recipe<Container> {
     @Override
     public RecipeType<?> getType() {
         return TYPE;
+    }
+
+    @Override
+    public boolean isSpecial() {
+        return true;
     }
 }
