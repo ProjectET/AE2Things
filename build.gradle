@@ -52,8 +52,6 @@ dependencies {
     mappings loom.officialMojangMappings()
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-    modLocalRuntime("dev.architectury:architectury:${project.arch_version}")
-
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
@@ -63,13 +61,23 @@ dependencies {
         exclude(group: "net.fabricmc.fabric-api")
     }
 
-    modCompileOnly("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}")
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}") {
+        exclude group: "net.fabricmc.fabric-api"
+        exclude group: "org.yaml" // snakeyaml
+        exclude group: "blue.endless" // jankson
+    }
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:${project.rei_version}") {
+        exclude group: "net.fabricmc.fabric-api"
+        exclude group: "org.yaml" // snakeyaml
+        exclude group: "blue.endless" // jankson
+    }
 
     modCompileOnly("mcp.mobius.waila:wthit-api:fabric-${project.wthit_version}") {
         exclude group: "net.fabricmc.fabric-api"
     }
 
-    modLocalRuntime("teamreborn:energy:${project.tr_energy_version}") {
+    modLocalRuntime "dev.architectury:architectury-fabric:6.2.43"
+    modLocalRuntime modCompileOnly("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}") {
         exclude group: "net.fabricmc.fabric-api"
     }
 

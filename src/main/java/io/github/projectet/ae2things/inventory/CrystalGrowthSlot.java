@@ -3,38 +3,35 @@ package io.github.projectet.ae2things.inventory;
 import appeng.api.inventories.InternalInventory;
 
 import appeng.api.stacks.GenericStack;
-import appeng.client.gui.Icon;
-import appeng.core.AELog;
 import appeng.menu.AEBaseMenu;
-import appeng.menu.slot.AppEngSlot;
-import net.minecraft.network.chat.Component;
+import io.github.projectet.ae2things.recipe.CrystalGrowthRecipe;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-
-import java.util.List;
-import java.util.function.Function;
+import net.minecraft.world.level.Level;
 
 public class CrystalGrowthSlot extends Slot {
-
-    int localGroupSlot;
 
     private static final Container EMPTY_INVENTORY = new SimpleContainer(0);
     private final InternalInventory inventory;
     private final int invSlot;
 
+    private Level world;
+
     private AEBaseMenu menu = null;
     private boolean active = true;
 
+    public final int slotIndex;
 
-    public CrystalGrowthSlot(InternalInventory inv, int invSlot, int x, int y) {
+
+    public CrystalGrowthSlot(InternalInventory inv, int invSlot, int x, int y, int slotIndex, Level world) {
         super(EMPTY_INVENTORY, invSlot, x, y);
         this.invSlot = invSlot;
+        this.slotIndex = slotIndex;
         this.inventory = inv;
-        int col = invSlot / 3;
-        localGroupSlot = invSlot - (col * 4);
+        this.world = world;
     }
 
     @Override
@@ -42,10 +39,25 @@ public class CrystalGrowthSlot extends Slot {
         if (containsWrapperItem()) {
             return false;
         }
-        if (this.isSlotEnabled()) {
-            return this.inventory.isItemValid(this.invSlot, stack);
+        CrystalGrowthRecipe recipe = CrystalGrowthRecipe.getRecipefromStack(world, stack);
+        if(recipe == null)
+            return false;
+        else {
+            switch(slotIndex) {
+                case 0 -> {
+                    return recipe.getFlawlessCrystal().test(stack) || recipe.getFlawedCrystal().test(stack);
+                }
+                case 1 -> {
+                    return recipe.getChippedCrystal().test(stack);
+                }
+                case 2 -> {
+                    return recipe.getDamagedCrystal().test(stack);
+                }
+                default -> {
+                    return false;
+                }
+            }
         }
-        return false;
     }
 
     @Override
